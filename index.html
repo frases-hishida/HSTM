@@ -3,11 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0A0A0B">
 <title>Hishida — Frases</title>
 <script>try{document.documentElement.dataset.theme=localStorage.getItem('fh.theme')||'dark'}catch(e){}</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@200..800&family=Space+Grotesk:wght@300..700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@200..800&family=Space+Grotesk:wght@300..700&family=Cormorant+Garamond:ital,wght@1,500;1,600&display=swap" rel="stylesheet">
 <style>
   :root[data-theme="dark"]{
     --bg:#0A0A0B; --bg-soft:rgba(10,10,11,.72);
@@ -17,7 +18,6 @@
     --hair:rgba(245,245,242,.28);
     --soft:rgba(245,245,242,.055);
     --shadow:0 24px 55px -28px rgba(0,0,0,.85);
-    /* Oscuro translúcido SUAVE */
     --press:rgba(0,0,0,.26);
     --press-2:rgba(0,0,0,.40);
     --press-line:rgba(245,245,242,.28);
@@ -30,17 +30,16 @@
     --hair:rgba(16,16,18,.26);
     --soft:rgba(16,16,18,.045);
     --shadow:0 24px 50px -28px rgba(16,16,18,.22);
-    /* Rojo claro transparente */
     --press:rgba(226,72,58,.10);
     --press-2:rgba(226,72,58,.20);
     --press-line:rgba(226,72,58,.42);
   }
-  *{margin:0;padding:0;box-sizing:border-box}
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
   html{scroll-behavior:smooth;scroll-padding-top:90px}
   body{
     background:var(--bg);color:var(--fg);
     font-family:'Manrope',sans-serif;line-height:1.5;
-    -webkit-font-smoothing:antialiased;overflow-x:hidden;
+    -webkit-font-smoothing:antialiased;overflow-x:clip;
     transition:background-color .5s ease,color .5s ease;
   }
   ::selection{background:var(--fg);color:var(--bg)}
@@ -57,8 +56,6 @@
     border-bottom:1px solid var(--line);transition:background-color .5s,border-color .5s;
   }
   .nav-in{max-width:1120px;margin:0 auto;display:flex;align-items:center;gap:14px;padding:11px clamp(18px,4vw,40px)}
-
-  /* Menú de sistemas */
   .admin-wrap{position:relative;flex:none}
   .admin-btn{
     display:flex;align-items:center;gap:9px;
@@ -91,11 +88,8 @@
     padding:10px 10px;border-radius:12px;
     transition:background-color .2s,border-color .2s;border:1px solid transparent;
   }
-  .am-item:hover{background:var(--press);border-color:var(--press-line)}
-  .am-ico{
-    width:32px;height:32px;border:1px solid var(--line);border-radius:10px;flex:none;
-    display:grid;place-items:center;
-  }
+  .am-item:hover,.am-item:active{background:var(--press);border-color:var(--press-line)}
+  .am-ico{width:32px;height:32px;border:1px solid var(--line);border-radius:10px;flex:none;display:grid;place-items:center}
   .am-ico svg{width:14px;height:14px}
   .am-text{display:flex;flex-direction:column;gap:1px;min-width:0}
   .am-text b{font-size:13.5px;font-weight:700;letter-spacing:-.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -104,12 +98,13 @@
   .nav-links{display:flex;gap:22px;margin-left:auto}
   .nav-links a{font-size:13px;font-weight:600;color:var(--mut);text-decoration:none;transition:color .25s}
   .nav-links a:hover{color:var(--fg)}
+  /* Botones de acción a la derecha: ojo (control) + tema */
+  .nav-actions{display:flex;align-items:center;gap:8px;margin-left:auto;flex:none}
   .icon-btn{
     width:36px;height:36px;border-radius:50%;border:1px solid var(--line);flex:none;
     display:grid;place-items:center;transition:background-color .25s,border-color .25s;
   }
-  .icon-btn:hover{background:var(--press);border-color:var(--press-line)}
-  .icon-btn:active{background:var(--press-2)}
+  .icon-btn:hover,.icon-btn:active{background:var(--press);border-color:var(--press-line)}
   .icon-btn svg{width:14px;height:14px}
   .icon-btn.sm{width:30px;height:30px}
   .icon-btn.sm svg{width:12px;height:12px}
@@ -119,18 +114,16 @@
     transition:background-color .25s,color .25s,border-color .25s;
   }
   .btn.primary{background:var(--fg);color:var(--bg);border:1px solid var(--fg)}
-  .btn.primary:hover{background:var(--press);border-color:var(--press-line);color:var(--fg)}
-  .btn.primary:active{background:var(--press-2)}
+  .btn.primary:hover,.btn.primary:active{background:var(--press);border-color:var(--press-line);color:var(--fg)}
   .btn.ghost{background:transparent;color:var(--fg);border:1px solid var(--line)}
-  .btn.ghost:hover{background:var(--press);border-color:var(--press-line)}
-  .btn.ghost:active{background:var(--press-2)}
+  .btn.ghost:hover,.btn.ghost:active{background:var(--press);border-color:var(--press-line)}
   .btn.full{width:100%}
   .add-btn{
     display:inline-flex;align-items:center;gap:6px;background:var(--soft);border:1px solid var(--line);
     border-radius:999px;padding:6px 13px;font-size:11.5px;font-weight:700;
     transition:background-color .25s,border-color .25s;
   }
-  .add-btn:hover{background:var(--press);border-color:var(--press-line)}
+  .add-btn:hover,.add-btn:active{background:var(--press);border-color:var(--press-line)}
   .ghost-btn{
     background:none;border:0;cursor:pointer;font-size:12px;font-weight:600;color:var(--mut);
     text-decoration:underline;text-underline-offset:3px;transition:color .2s;padding:2px 0;
@@ -140,6 +133,11 @@
   /* ---------- Hero ---------- */
   .hero{padding-top:clamp(48px,8vw,88px)}
   .kicker{font-family:'Space Grotesk';font-size:10.5px;font-weight:600;letter-spacing:.22em;text-transform:uppercase;color:var(--mut)}
+  .kicker-elegant{
+    font-family:'Cormorant Garamond',serif;font-style:italic;font-weight:600;
+    font-size:clamp(15px,2vw,19px);letter-spacing:.26em;text-transform:uppercase;
+    color:var(--mut);
+  }
   .hero h1{margin-top:12px;font-weight:650;letter-spacing:-.035em;line-height:1.02;font-size:clamp(36px,6.5vw,72px)}
   .tagline{margin-top:12px;color:var(--mut);font-size:15.5px;max-width:52ch}
   .chip{
@@ -147,8 +145,16 @@
     padding:6px 13px;font-family:'Space Grotesk';font-size:10px;font-weight:600;
     letter-spacing:.1em;text-transform:uppercase;color:var(--mut);
   }
-  .chip .pulse{width:6px;height:6px;border-radius:50%;background:var(--fg);animation:pulse 2.4s ease-in-out infinite}
-  @keyframes pulse{50%{opacity:.25}}
+  .chip.online .pulse{
+    width:6px;height:6px;border-radius:50%;flex:none;
+    background:#2ECC71;
+    animation:onlinePulse 2.2s ease-out infinite;
+  }
+  @keyframes onlinePulse{
+    0%{box-shadow:0 0 0 0 rgba(46,204,113,.5)}
+    70%{box-shadow:0 0 0 9px rgba(46,204,113,0)}
+    100%{box-shadow:0 0 0 0 rgba(46,204,113,0)}
+  }
   .hero .chip{margin-top:18px}
 
   /* ---------- Secciones ---------- */
@@ -198,7 +204,6 @@
     transition:border-color .2s,background-color .2s;
   }
   .input:focus{border-color:var(--hair)}
-  .qform-note{margin-top:10px;font-family:'Space Grotesk';font-size:9.5px;font-weight:600;letter-spacing:.09em;text-transform:uppercase;color:var(--mut)}
 
   /* ---------- Estadísticas ---------- */
   #stats{margin-top:12px}
@@ -221,23 +226,21 @@
     padding:14px 14px 15px;text-decoration:none;
     transition:background-color .3s,border-color .3s,transform .3s,box-shadow .3s;
   }
-  .pcard:hover{
+  .pcard:hover,.pcard:active{
     background:var(--press);border-color:var(--press-line);
     transform:translateY(-2px);box-shadow:var(--shadow);
-    backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
   }
-  .pcard:active{background:var(--press-2)}
   .pc-top{display:flex;align-items:center;justify-content:space-between}
   .pc-glyph{width:34px;height:34px;border:1px solid var(--line);border-radius:10px;flex:none;display:grid;place-items:center;transition:transform .4s cubic-bezier(.22,.8,.24,1),border-color .3s}
   .pc-glyph svg{width:17px;height:17px}
-  .pcard:hover .pc-glyph{transform:rotate(-8deg) scale(1.06);border-color:var(--press-line)}
+  .pcard:hover .pc-glyph,.pcard:active .pc-glyph{transform:rotate(-8deg) scale(1.06);border-color:var(--press-line)}
   .pc-arrow{
     width:24px;height:24px;border:1px solid var(--line);border-radius:50%;
     display:grid;place-items:center;opacity:0;transform:translate(-4px,4px);
     transition:opacity .3s,transform .3s,border-color .3s;
   }
   .pc-arrow svg{width:11px;height:11px}
-  .pcard:hover .pc-arrow{opacity:1;transform:none;border-color:var(--fg)}
+  .pcard:hover .pc-arrow,.pcard:active .pc-arrow{opacity:1;transform:none;border-color:var(--fg)}
   .pc-name{font-weight:700;font-size:15px;letter-spacing:-.015em;line-height:1.2}
   .pc-handle{
     width:max-content;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
@@ -245,12 +248,12 @@
     font-family:'Space Grotesk';font-size:9.5px;font-weight:600;letter-spacing:.07em;
     transition:border-color .25s,background-color .25s;
   }
-  .pc-handle:hover{background:var(--press);border-color:var(--press-line)}
+  .pc-handle:hover,.pc-handle:active{background:var(--press);border-color:var(--press-line)}
   .pc-foot{display:flex;align-items:baseline;gap:8px;margin-top:auto;flex-wrap:wrap}
   .pc-foot b{font-family:'Space Grotesk';font-weight:600;font-size:20px;letter-spacing:-.02em;font-variant-numeric:tabular-nums;line-height:1.1;white-space:nowrap}
   .pc-lab{font-family:'Space Grotesk';font-size:9px;font-weight:600;letter-spacing:.11em;text-transform:uppercase;color:var(--mut)}
   .empty-card{border-style:dashed;min-height:120px;justify-content:center;cursor:default}
-  .empty-card:hover{transform:none;box-shadow:none;background:var(--card);border-color:var(--line)}
+  .empty-card:hover,.empty-card:active{transform:none;box-shadow:none;background:var(--card);border-color:var(--line)}
   .empty-card .pc-lab{text-transform:none;letter-spacing:.02em;font-size:12px;max-width:36ch}
 
   /* ---------- Footer ---------- */
@@ -266,6 +269,7 @@
     position:fixed;inset:0;z-index:100;background:rgba(0,0,0,.5);backdrop-filter:blur(4px);
     opacity:0;pointer-events:none;transition:opacity .3s;
   }
+  :root[data-theme="light"] .overlay{background:rgba(16,16,18,.35)}
   .overlay.open{opacity:1;pointer-events:auto}
   #authOverlay{z-index:130;display:flex;align-items:center;justify-content:center;padding:16px}
   #drawerOverlay{z-index:110}
@@ -296,7 +300,7 @@
   .drawer-head{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:16px 20px;border-bottom:1px solid var(--line);flex:none}
   .drawer-head h3{font-weight:700;font-size:18px;letter-spacing:-.02em;margin-top:2px}
   .drawer-actions{display:flex;gap:8px}
-  .drawer-body{flex:1;overflow-y:auto;padding:4px 20px 24px}
+  .drawer-body{flex:1;overflow-y:auto;padding:4px 20px 24px;-webkit-overflow-scrolling:touch}
   .drawer-foot{
     flex:none;border-top:1px solid var(--line);padding:13px 20px;
     display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;
@@ -333,7 +337,7 @@
     width:30px;height:30px;display:grid;place-items:center;flex:none;border-radius:50%;color:var(--mut);
     border:1px solid transparent;transition:background-color .2s,border-color .2s,color .2s;padding:0;
   }
-  .ed-del:hover{color:var(--fg);background:var(--press);border-color:var(--press-line)}
+  .ed-del:hover,.ed-del:active{color:var(--fg);background:var(--press);border-color:var(--press-line)}
   .ed-del svg{width:12px;height:12px}
   .ed-del.armed{
     width:auto;padding:0 11px;border-radius:999px;background:var(--press-2);color:var(--fg);
@@ -346,7 +350,7 @@
     display:grid;place-items:center;transition:background-color .2s,border-color .2s;padding:0;
   }
   .gp svg{width:16px;height:16px}
-  .gp:hover{background:var(--press);border-color:var(--press-line)}
+  .gp:hover,.gp:active{background:var(--press);border-color:var(--press-line)}
   .gp.sel{background:var(--press);border-color:var(--fg)}
   .ed-empty{color:var(--mut);font-size:13px;padding:12px 2px}
 
@@ -359,15 +363,16 @@
   }
   .toast.show{opacity:1;transform:translate(-50%,0)}
 
-  /* ---------- Aparición ---------- */
-  .rv{opacity:0}
-  .rv.in{animation:rise .7s cubic-bezier(.22,.8,.24,1) both;animation-delay:var(--d,0s)}
+  /* ---------- Aparición: 100% CSS, nunca depende de JavaScript ---------- */
+  .rv{
+    animation:rise .7s cubic-bezier(.22,.8,.24,1) both;
+    animation-delay:var(--d,0s);
+  }
   @keyframes rise{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
 
   /* ---------- Responsive ---------- */
   @media (max-width:820px){
     .nav-links{display:none}
-    .nav-in .icon-btn{margin-left:auto}
     .pgrid{grid-template-columns:repeat(auto-fill,minmax(145px,1fr))}
   }
   @media (max-width:720px){
@@ -390,13 +395,13 @@
   @media (prefers-reduced-motion:reduce){
     *{animation:none!important;transition:none!important}
     .rv{opacity:1}
+    .chip.online .pulse{animation:onlinePulse 2.2s ease-out infinite!important}
     html{scroll-behavior:auto}
   }
 </style>
 </head>
 <body>
 
-<!-- Gradiente oficial de Instagram -->
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
   <defs>
     <linearGradient id="igGrad" x1="0" y1="1" x2="1" y2="0">
@@ -411,9 +416,8 @@
 
 <nav class="nav">
   <div class="nav-in">
-    <!-- Menú de sistemas -->
     <div class="admin-wrap">
-      <button class="admin-btn" id="adminBtn" aria-haspopup="true" aria-expanded="false" aria-label="Menú de sistemas">
+      <button class="admin-btn" id="adminBtn" aria-haspopup="true" aria-expanded="false" aria-label="Menú de sitios">
         <span class="ab-fs">Fs</span>
         <span class="ab-name">Hishida</span>
         <svg class="ab-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
@@ -422,15 +426,15 @@
         <span class="am-label">Sistemas</span>
         <button class="am-item" id="amThis" role="menuitem">
           <span class="am-ico">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 9.5c0-3 2-5 5-5M19.5 9.5c0-3-2-5-5-5"/><path d="M6.5 13.5h4v6h-3a3 3 0 0 1-1-6zM13.5 13.5h4v6h-3a3 3 0 0 1-1-6z" transform="scale(.9) translate(1.3,1)"/></svg>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4.5" width="18" height="12" rx="2"/><path d="M9 20h6M12 16.5V20"/></svg>
           </span>
-          <span class="am-text"><b>Sistema de frases</b><small>Editar este sitio</small></span>
+          <span class="am-text"><b>Sitio web 1</b></span>
         </button>
         <button class="am-item" id="amOther" role="menuitem">
           <span class="am-ico">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4h6v6M20 4l-9 9"/><path d="M19 13.5V18a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h4.5"/></svg>
           </span>
-          <span class="am-text"><b id="amOtherName">Segundo sistema</b><small id="amOtherHint">Sin configurar</small></span>
+          <span class="am-text"><b>Sitio web 2</b><small>Abrir enlace</small></span>
         </button>
       </div>
     </div>
@@ -439,19 +443,26 @@
       <a href="#frases">Frases</a>
       <a href="#plataformas">Plataformas</a>
     </div>
-    <button class="icon-btn" id="themeBtn" aria-label="Cambiar tema" title="Claro / oscuro">
-      <svg id="themeIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></svg>
-    </button>
+
+    <div class="nav-actions">
+      <!-- Ojo: control único del sitio (crear cuenta la 1.ª vez, luego entrar) -->
+      <button class="icon-btn" id="eyeBtn" aria-label="Control del sitio" title="Control del sitio">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-6.5 10-6.5S22 12 22 12s-3.5 6.5-10 6.5S2 12 2 12z"/><circle cx="12" cy="12" r="2.8"/></svg>
+      </button>
+      <button class="icon-btn" id="themeBtn" aria-label="Cambiar tema" title="Claro / oscuro">
+        <svg id="themeIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></svg>
+      </button>
+    </div>
   </div>
 </nav>
 
 <main class="wrap">
 
   <section class="hero" id="inicio">
-    <span class="kicker rv">Creador de frases</span>
-    <h1 class="rv" style="--d:60ms" id="heroName"></h1>
+    <span class="kicker-elegant rv">Creador de contenido</span>
+    <h1 class="rv" style="--d:60ms" id="heroName">Hishida</h1>
     <p class="tagline rv" style="--d:120ms" id="heroTagline"></p>
-    <span class="chip rv" style="--d:180ms"><i class="pulse"></i><span id="updChip"></span></span>
+    <span class="chip rv online" style="--d:180ms"><i class="pulse"></i><span id="updChip">En línea</span></span>
   </section>
 
   <section id="frases">
@@ -482,7 +493,6 @@
         <input class="input" id="qFormName" maxlength="24" placeholder="Tu nombre (opcional)" autocomplete="off">
         <button type="submit" class="btn primary" id="qSubmit">Publicar</button>
       </div>
-      <p class="qform-note">Tu frase se publica al instante. Solo Hishida puede eliminarla.</p>
     </form>
   </section>
 
@@ -506,23 +516,22 @@
   <section id="plataformas">
     <div class="sec-head rv">
       <span class="sec-title">Plataformas</span>
-      <span class="sec-count" id="pCount"></span>
     </div>
     <div class="pgrid" id="pgrid"></div>
   </section>
 
   <footer>
     <span class="mini">© <span id="footYear"></span> · <span id="footOwner"></span></span>
-    <span class="mini">frases_hishida</span>
+    <span class="mini">frases_hishida · v9</span>
   </footer>
 
 </main>
 
-<!-- ===== Acceso del autor ===== -->
+<!-- ===== Control del sitio (ojo) ===== -->
 <div class="overlay" id="authOverlay">
   <div class="modal" role="dialog" aria-modal="true" aria-labelledby="authTitle">
     <div class="modal-head">
-      <span class="kicker">Fs Hishida · Acceso</span>
+      <span class="kicker">Control del sitio</span>
       <button class="icon-btn sm" id="authClose" aria-label="Cerrar">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
       </button>
@@ -549,11 +558,10 @@
 
 <div class="overlay" id="drawerOverlay"></div>
 
-<!-- ===== Panel del autor ===== -->
-<aside class="drawer" id="drawer" role="dialog" aria-modal="true" aria-label="Panel del autor">
+<aside class="drawer" id="drawer" role="dialog" aria-modal="true" aria-label="Panel del propietario">
   <header class="drawer-head">
     <div>
-      <span class="kicker">Fs Hishida</span>
+      <span class="kicker">Control del sitio</span>
       <h3>Tus datos públicos</h3>
     </div>
     <div class="drawer-actions">
@@ -592,9 +600,8 @@
     </section>
 
     <section class="ed-sec">
-      <span class="ed-title">Segundo sistema (menú superior)</span>
+      <span class="ed-title">Sitio web 2 · Enlace del menú</span>
       <div class="ed-stack" style="margin-top:12px">
-        <label class="field"><span>Nombre</span><input class="input" id="edSys2Name" placeholder="Ej. Panel de videos"></label>
         <label class="field"><span>Enlace (URL)</span><input class="input" id="edSys2Url" placeholder="https://…"></label>
       </div>
     </section>
@@ -621,27 +628,37 @@
 <div class="toast" id="toast" role="status"></div>
 
 <script>
-/* ============ Utilidades ============ */
-const $  = s => document.querySelector(s);
-const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const uid = () => (crypto.randomUUID ? crypto.randomUUID() : 'x' + Date.now() + Math.random().toString(36).slice(2));
-const clone = o => JSON.parse(JSON.stringify(o));
-const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
-function hashStr(s){ let h = 5381; for (let i = 0; i < s.length; i++) h = ((h << 5) + h + s.charCodeAt(i)) >>> 0; return 'h' + h.toString(36); }
-const fmtInt = n => Math.round(n).toLocaleString('es-ES');
-
-/* Formato compacto sin decimales: 850 / 1 mil / 509 mil / 1 M */
+/* ============ Utilidades (compatibles con Android antiguos) ============ */
+function $(s){ return document.querySelector(s); }
+function esc(s){
+  return String(s == null ? '' : s).replace(/[&<>"']/g, function(c){
+    return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
+  });
+}
+function uid(){
+  return (crypto && crypto.randomUUID) ? crypto.randomUUID()
+    : 'x' + Date.now() + Math.random().toString(36).slice(2);
+}
+function clone(o){ return JSON.parse(JSON.stringify(o)); }
+function isArr(x){ return Object.prototype.toString.call(x) === '[object Array]'; }
+var reduced = false;
+try { reduced = matchMedia('(prefers-reduced-motion: reduce)').matches; } catch(e){}
+function hashStr(s){
+  var h = 5381;
+  for (var i = 0; i < s.length; i++) h = ((h << 5) + h + s.charCodeAt(i)) >>> 0;
+  return 'h' + h.toString(36);
+}
+function fmtInt(n){ return Math.round(n).toLocaleString('es-ES'); }
 function fmtCompact(n){
   n = Math.round(n);
   if (n < 1000) return String(n);
   if (n >= 999500) return Math.round(n / 1e6) + ' M';
   return Math.round(n / 1000) + ' mil';
 }
-
 function copyText(t){
-  const done = () => toast('Copiado: ' + t);
-  const fallback = () => {
-    const ta = document.createElement('textarea');
+  var done = function(){ toast('Copiado: ' + t); };
+  var fallback = function(){
+    var ta = document.createElement('textarea');
     ta.value = t; ta.style.cssText = 'position:fixed;opacity:0';
     document.body.appendChild(ta); ta.select();
     try { document.execCommand('copy'); done(); } catch(e){ toast('No se pudo copiar.'); }
@@ -651,13 +668,18 @@ function copyText(t){
     navigator.clipboard.writeText(t).then(done).catch(fallback);
   } else fallback();
 }
+function openExternal(url){
+  var a = document.createElement('a');
+  a.href = url; a.target = '_blank'; a.rel = 'noopener';
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+}
 
-/* =========================================================
-   ICONOS OFICIALES CON COLOR DE MARCA
-========================================================= */
-const TT_PATH = 'M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z';
+/* ============ ICONOS OFICIALES CON COLOR DE MARCA ============ */
+var TT_PATH = 'M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z';
 
-const BRANDS = {
+var BRANDS = {
   facebook: { color:'#1877F2', d:'M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z' },
   youtube:  { color:'#FF0000', d:'M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z' },
   whatsapp: { color:'#25D366', d:'M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z' },
@@ -669,41 +691,40 @@ const BRANDS = {
 };
 
 function glyphSVG(k){
-  const b = BRANDS[k] || BRANDS.asterisk;
+  var b = BRANDS[k] || BRANDS.asterisk;
   if (b.special){
-    return `<svg viewBox="-2.6 -2.6 29.2 29.2" aria-hidden="true">
-      <path d="${TT_PATH}" transform="translate(-1.5,-1.5)" fill="#25F4EE"/>
-      <path d="${TT_PATH}" transform="translate(1.5,1.5)" fill="#FE2C55"/>
-      <path d="${TT_PATH}" fill="currentColor"/>
-    </svg>`;
+    return '<svg viewBox="-2.6 -2.6 29.2 29.2" aria-hidden="true">'
+      + '<path d="' + TT_PATH + '" transform="translate(-1.5,-1.5)" fill="#25F4EE"/>'
+      + '<path d="' + TT_PATH + '" transform="translate(1.5,1.5)" fill="#FE2C55"/>'
+      + '<path d="' + TT_PATH + '" fill="currentColor"/></svg>';
   }
   if (b.stroke){
-    return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${b.d}</svg>`;
+    return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + b.d + '</svg>';
   }
-  return `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="${b.d}" fill="${b.color}"/></svg>`;
+  return '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="' + b.d + '" fill="' + b.color + '"/></svg>';
 }
 function guessGlyph(name){
-  const n = (name || '').toLowerCase();
-  if (n.includes('face')) return 'facebook';
-  if (n.includes('youtube') || n.includes('yt')) return 'youtube';
-  if (n.includes('insta')) return 'instagram';
-  if (n.includes('tiktok') || n.includes('tok')) return 'tiktok';
-  if (n.includes('whats') || n.includes('wsp') || n.includes('grupo')) return 'whatsapp';
-  if (n.trim() === 'x' || n.includes('twitter')) return 'x';
+  var n = (name || '').toLowerCase();
+  if (n.indexOf('face') > -1) return 'facebook';
+  if (n.indexOf('youtube') > -1 || n.indexOf('yt') > -1) return 'youtube';
+  if (n.indexOf('insta') > -1) return 'instagram';
+  if (n.indexOf('tiktok') > -1 || n.indexOf('tok') > -1) return 'tiktok';
+  if (n.indexOf('whats') > -1 || n.indexOf('wsp') > -1 || n.indexOf('grupo') > -1) return 'whatsapp';
+  if (n === 'x' || n.indexOf('twitter') > -1) return 'x';
   return 'asterisk';
 }
-const ICON = {
+var ICON = {
   arrow:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M9 7h8v8"/></svg>',
   trash:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M9 7V4.5h6V7M6.5 7l1 12.5h9l1-12.5"/></svg>',
   sun:  '<circle cx="12" cy="12" r="4.2"/><path d="M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6l1.4 1.4M17 17l1.4 1.4M18.4 5.6L17 7M7 17l-1.4 1.4"/>',
   moon: '<path d="M20 13.6A8 8 0 1 1 10.4 4 6.4 6.4 0 0 0 20 13.6z"/>'
 };
 
-/* ============ Estado ============ */
-const LS_KEY = 'fh.kit.v1';
-const SEED = {
+/* ============ Estado — TUS DATOS REALES ============ */
+var LS_KEY = 'fh.kit.v7'; /* se conserva: tu cuenta y datos no se pierden */
+var SEED = {
   admin: { user:'frases_hishida', pass:null },
-  sys2:  { name:'', url:'' },
+  sys2:  { name:'Sitio web 2', url:'https://frases-hishida.github.io/fsapp/' },
   owner: 'Hishida',
   tagline: 'Frases para sentir, pensar y compartir. Mías y de quienes pasan por aquí.',
   updatedAt: null,
@@ -714,49 +735,88 @@ const SEED = {
     { id:'q4', text:'Ser suave también es una forma de ser fuerte.', tag:'Calma', by:'admin', author:'' }
   ],
   platforms: [
-    { id:'p1', name:'TikTok',    handle:'@frases_hishida', count:508900, url:'https://tiktok.com/@frases_hishida', label:'seguidores',   glyph:'tiktok' },
-    { id:'p2', name:'Instagram', handle:'@frases_hishida', count:214300, url:'https://instagram.com/frases_hishida', label:'seguidores', glyph:'instagram' },
-    { id:'p3', name:'Facebook',  handle:'Frases Hishida',  count:96120,  url:'https://facebook.com/fraseshishida', label:'seguidores',   glyph:'facebook' },
-    { id:'p4', name:'YouTube',   handle:'@frases_hishida', count:34800,  url:'https://youtube.com/@frases_hishida', label:'suscriptores', glyph:'youtube' },
-    { id:'p5', name:'Grupo de WhatsApp', handle:'Frases Hishida', count:2140, url:'https://chat.whatsapp.com', label:'miembros', glyph:'whatsapp' }
+    { id:'p1', name:'TikTok',    handle:'@frases_hishida',          count:0, url:'https://www.tiktok.com/@frases_hishida',           label:'seguidores',   glyph:'tiktok' },
+    { id:'p2', name:'Instagram', handle:'@fraseshishida',           count:0, url:'https://www.instagram.com/fraseshishida/',         label:'seguidores',   glyph:'instagram' },
+    { id:'p3', name:'Facebook',  handle:'Hishida099',               count:0, url:'https://www.facebook.com/Hishida099',              label:'seguidores',   glyph:'facebook' },
+    { id:'p4', name:'YouTube',   handle:'@Frases_hishida',          count:0, url:'https://www.youtube.com/@Frases_hishida',          label:'suscriptores', glyph:'youtube' },
+    { id:'p5', name:'Grupo de WhatsApp', handle:'Comunidad Frases y más..', count:0, url:'https://chat.whatsapp.com/CzVStek9Td92bgusVeX8xk', label:'miembros', glyph:'whatsapp' }
   ]
 };
-function load(){ try { const r = localStorage.getItem(LS_KEY); if (r) return JSON.parse(r); } catch(e){} return clone(SEED); }
-function persist(){ try { localStorage.setItem(LS_KEY, JSON.stringify(state)); } catch(e){} }
-let state = load();
-if (!state.admin) state.admin = clone(SEED.admin);
-if (!state.sys2)  state.sys2  = clone(SEED.sys2);
-if (state.phrases) state.phrases.forEach(q => { if (!q.by) q.by = 'admin'; });
-let unlocked = false;
-const prevCounts = {};
 
-const drawerEl = $('#drawer'), authOverlay = $('#authOverlay'), qCard = $('#qCard');
-const adminBtn = $('#adminBtn'), adminMenu = $('#adminMenu');
+/* Carga VALIDADA: si lo guardado está corrupto, se regenera */
+function load(){
+  var out = clone(SEED);
+  try {
+    var r = localStorage.getItem(LS_KEY);
+    if (r){
+      var saved = JSON.parse(r);
+      if (saved && typeof saved === 'object'){
+        if (typeof saved.owner === 'string' && saved.owner) out.owner = saved.owner;
+        if (typeof saved.tagline === 'string') out.tagline = saved.tagline;
+        if (saved.admin && typeof saved.admin === 'object'){
+          if (saved.admin.user) out.admin.user = saved.admin.user;
+          if (saved.admin.pass) out.admin.pass = saved.admin.pass;
+        }
+        if (saved.sys2 && typeof saved.sys2 === 'object'){
+          out.sys2.url = typeof saved.sys2.url === 'string' ? saved.sys2.url : out.sys2.url;
+        }
+        if (isArr(saved.phrases) && saved.phrases.length) out.phrases = saved.phrases;
+        if (isArr(saved.platforms) && saved.platforms.length) out.platforms = saved.platforms;
+        if (saved.updatedAt) out.updatedAt = saved.updatedAt;
+      }
+    }
+  } catch(e){ /* datos corruptos: se usan los de fábrica */ }
+  return out;
+}
+function persist(){ try { localStorage.setItem(LS_KEY, JSON.stringify(state)); } catch(e){} }
+var state = load();
+if (!isArr(state.phrases)) state.phrases = clone(SEED.phrases);
+if (!isArr(state.platforms)) state.platforms = clone(SEED.platforms);
+for (var _i = 0; _i < state.phrases.length; _i++){
+  if (!state.phrases[_i].by) state.phrases[_i].by = 'admin';
+}
+var unlocked = false;
+var prevCounts = {};
+
+var drawerEl = $('#drawer'), authOverlay = $('#authOverlay'), qCard = $('#qCard');
+var adminBtn = $('#adminBtn'), adminMenu = $('#adminMenu');
+
+function syncScrollLock(){
+  var open = drawerEl.classList.contains('open') || authOverlay.classList.contains('open');
+  document.body.style.overflow = open ? 'hidden' : '';
+}
 
 /* ============ Tema ============ */
 function paintIcon(){
   $('#themeIcon').innerHTML = document.documentElement.dataset.theme === 'dark' ? ICON.sun : ICON.moon;
 }
- $('#themeBtn').onclick = () => {
-  const next = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
+function paintThemeColor(){
+  var meta = document.querySelector('meta[name="theme-color"]');
+  if (meta) meta.setAttribute('content',
+    document.documentElement.dataset.theme === 'dark' ? '#0A0A0B' : '#FAFAF8');
+}
+ $('#themeBtn').onclick = function(){
+  var next = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
   document.documentElement.dataset.theme = next;
   try { localStorage.setItem('fh.theme', next); } catch(e){}
   paintIcon();
+  paintThemeColor();
   toast(next === 'dark' ? 'Tema oscuro' : 'Tema claro');
 };
 paintIcon();
+paintThemeColor();
 
 /* ============ Toast ============ */
-let toastTimer;
+var toastTimer;
 function toast(msg){
-  const t = $('#toast');
+  var t = $('#toast');
   t.textContent = msg;
   t.classList.add('show');
   clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => t.classList.remove('show'), 2400);
+  toastTimer = setTimeout(function(){ t.classList.remove('show'); }, 2400);
 }
 
-/* ============ Menú de sistemas ============ */
+/* ============ Menú de sitios ============ */
 function openAdminMenu(){
   adminMenu.classList.add('open');
   adminBtn.classList.add('active');
@@ -767,34 +827,40 @@ function closeAdminMenu(){
   adminBtn.classList.remove('active');
   adminBtn.setAttribute('aria-expanded','false');
 }
-adminBtn.onclick = () => adminMenu.classList.contains('open') ? closeAdminMenu() : openAdminMenu();
-document.addEventListener('click', e => {
+adminBtn.onclick = function(){
+  if (adminMenu.classList.contains('open')) closeAdminMenu(); else openAdminMenu();
+};
+document.addEventListener('click', function(e){
   if (!e.target.closest('.admin-wrap')) closeAdminMenu();
 });
-
-/* Sistema 1: este sitio */
- $('#amThis').onclick = () => {
+/* Sitio web 1: este sitio — lleva al inicio */
+ $('#amThis').onclick = function(){
   closeAdminMenu();
-  unlocked ? openDrawer() : openAuth();
+  var hero = document.getElementById('inicio');
+  if (hero) hero.scrollIntoView({ behavior:'smooth', block:'start' });
 };
-/* Sistema 2: configurable */
- $('#amOther').onclick = () => {
+/* Sitio web 2: abre el enlace configurado */
+ $('#amOther').onclick = function(){
   closeAdminMenu();
-  const url = (state.sys2 && state.sys2.url || '').trim();
+  var url = ((state.sys2 && state.sys2.url) || '').trim();
   if (url){
-    window.open(url, '_blank', 'noopener');
+    openExternal(url);
   } else {
-    toast('Configura el segundo sistema desde tu panel (Fs Hishida).');
+    toast('Configura el enlace de Sitio web 2 desde tu panel (icono de ojo).');
   }
+};
+/* Ojo: control único del sitio (crear cuenta la 1.ª vez / entrar después) */
+ $('#eyeBtn').onclick = function(){
+  if (unlocked) openDrawer(); else openAuth();
 };
 
 /* ============ Motor de frases ============ */
-const Q_DUR = 6500;
-let qi = 0, qElapsed = 0, qLast = null, qPaused = false;
+var Q_DUR = 6500;
+var qi = 0, qElapsed = 0, qLast = null, qPaused = false;
 
 function renderQuote(){
-  const list = state.phrases, len = list.length;
-  const wrap = $('#qTextWrap');
+  var list = state.phrases, len = list.length;
+  var wrap = $('#qTextWrap');
   if (!len){
     $('#qTagChip').textContent = 'Sin frases';
     $('#qIdx').textContent = '— / —';
@@ -802,16 +868,18 @@ function renderQuote(){
     return;
   }
   if (qi >= len) qi = 0;
-  const q = list[qi];
+  var q = list[qi];
   $('#qTagChip').textContent = q.by === 'community'
     ? 'Comunidad' + (q.author ? ' · ' + q.author : '')
     : (q.tag || 'Frase');
   $('#qIdx').textContent = String(qi + 1).padStart(2,'0') + ' / ' + String(len).padStart(2,'0');
   wrap.innerHTML = '<p class="q-text">' + esc(q.text) + '</p>';
-  wrap.classList.remove('q-anim'); void wrap.offsetWidth; wrap.classList.add('q-anim');
+  wrap.classList.remove('q-anim');
+  void wrap.offsetWidth;
+  wrap.classList.add('q-anim');
 }
 function navQuote(d){
-  const len = state.phrases.length;
+  var len = state.phrases.length;
   if (!len) return;
   qi = ((qi + d) % len + len) % len;
   qElapsed = 0;
@@ -822,36 +890,41 @@ function modalsBusy(){
 }
 function qLoop(t){
   if (qLast == null) qLast = t;
-  let dt = t - qLast; qLast = t;
+  var dt = t - qLast;
+  qLast = t;
   if (dt < 0 || dt > 200) dt = 0;
-  const len = state.phrases.length;
-  const paused = qPaused || document.hidden || modalsBusy() || len < 2 || reduced;
+  var len = state.phrases.length;
+  var paused = qPaused || document.hidden || modalsBusy() || len < 2 || reduced;
   if (!paused){
     qElapsed += dt;
-    if (qElapsed >= Q_DUR){ qElapsed = 0; qi = (qi + 1) % len; renderQuote(); }
+    if (qElapsed >= Q_DUR){
+      qElapsed = 0;
+      qi = (qi + 1) % len;
+      renderQuote();
+    }
   }
-  const fill = $('#qProgFill');
+  var fill = $('#qProgFill');
   if (fill) fill.style.width = reduced ? '0%' : Math.min(100, qElapsed / Q_DUR * 100) + '%';
   requestAnimationFrame(qLoop);
 }
- $('#qPrev').onclick = () => navQuote(-1);
- $('#qNext').onclick = () => navQuote(1);
- $('#qCopy').onclick = () => {
-  const q = state.phrases[qi];
+ $('#qPrev').onclick = function(){ navQuote(-1); };
+ $('#qNext').onclick = function(){ navQuote(1); };
+ $('#qCopy').onclick = function(){
+  var q = state.phrases[qi];
   if (q) copyText('“' + q.text + '”');
 };
-qCard.addEventListener('pointerenter', () => qPaused = true);
-qCard.addEventListener('pointerleave', () => qPaused = false);
-qCard.addEventListener('focusin',  () => qPaused = true);
-qCard.addEventListener('focusout', () => qPaused = false);
+qCard.addEventListener('pointerenter', function(){ qPaused = true; });
+qCard.addEventListener('pointerleave', function(){ qPaused = false; });
+qCard.addEventListener('focusin',  function(){ qPaused = true; });
+qCard.addEventListener('focusout', function(){ qPaused = false; });
 
 /* ============ Frases de la comunidad ============ */
- $('#qForm').addEventListener('submit', e => {
+ $('#qForm').addEventListener('submit', function(e){
   e.preventDefault();
-  const text = $('#qFormPhrase').value.trim();
+  var text = $('#qFormPhrase').value.trim();
   if (!text){ toast('Escribe tu frase antes de publicar.'); $('#qFormPhrase').focus(); return; }
-  const author = $('#qFormName').value.trim().slice(0, 24);
-  state.phrases.push({ id: uid(), text: text.slice(0,180), tag:'Comunidad', by:'community', author });
+  var author = $('#qFormName').value.trim().slice(0, 24);
+  state.phrases.push({ id: uid(), text: text.slice(0,180), tag:'Comunidad', by:'community', author: author });
   state.updatedAt = Date.now();
   persist();
   qi = state.phrases.length - 1;
@@ -860,24 +933,23 @@ qCard.addEventListener('focusout', () => qPaused = false);
   $('#qFormPhrase').value = '';
   $('#qFormName').value = '';
   toast('Frase publicada. ¡Gracias por compartir!');
-  qCard.scrollIntoView({ behavior:'smooth', block:'nearest' });
 });
 
 /* ============ Contadores ============ */
 function runCounters(){
-  document.querySelectorAll('.count-anim').forEach(el => {
-    const key = el.dataset.count;
-    const target = +el.dataset.target || 0;
-    const from = prevCounts[key] ?? 0;
+  document.querySelectorAll('.count-anim').forEach(function(el){
+    var key = el.dataset.count;
+    var target = +el.dataset.target || 0;
+    var from = (key in prevCounts) ? prevCounts[key] : 0;
     prevCounts[key] = target;
-    const show = v => target >= 1000 ? fmtCompact(v) : fmtInt(v);
+    var show = function(v){ return target >= 1000 ? fmtCompact(v) : fmtInt(v); };
     if (reduced){ el.textContent = show(target); return; }
-    const dur = 1200;
-    const t0 = performance.now();
-    cancelAnimationFrame(el._raf);
-    const step = t => {
-      const p = Math.min(1, (t - t0) / dur);
-      const e = 1 - Math.pow(1 - p, 4);
+    var dur = 1200;
+    var t0 = performance.now();
+    if (el._raf) cancelAnimationFrame(el._raf);
+    var step = function(t){
+      var p = Math.min(1, (t - t0) / dur);
+      var e = 1 - Math.pow(1 - p, 4);
       el.textContent = show(from + (target - from) * e);
       if (p < 1) el._raf = requestAnimationFrame(step);
     };
@@ -885,109 +957,107 @@ function runCounters(){
   });
 }
 
-/* ============ Aparición al hacer scroll ============ */
-function observeReveals(){
-  const io = new IntersectionObserver(entries => {
-    entries.forEach(en => { if (en.isIntersecting){ en.target.classList.add('in'); io.unobserve(en.target); } });
-  }, { threshold:.08 });
-  document.querySelectorAll('.rv:not(.in)').forEach(el => io.observe(el));
-}
-
-/* ============ Tarjetas compactas ============ */
+/* ============ Tarjetas de plataformas ============ */
 function cardHTML(p, i){
-  const g = glyphSVG(p.glyph || guessGlyph(p.name));
-  const url = (p.url || '').trim();
-  return `<a class="pcard rv" style="--d:${Math.min(i * 50, 250)}ms"
-    href="${url ? esc(url) : '#'}" ${url ? 'target="_blank" rel="noopener"' : ''} data-nolink="${url ? 0 : 1}">
-    <span class="pc-top">
-      <span class="pc-glyph">${g}</span>
-      <span class="pc-arrow">${ICON.arrow}</span>
-    </span>
-    <span class="pc-name">${esc(p.name)}</span>
-    <span class="pc-handle" data-handle="${esc(p.handle)}" title="Copiar usuario">${esc(p.handle)}</span>
-    <span class="pc-foot">
-      <b class="count-anim" data-count="${esc(p.id)}" data-target="${+p.count || 0}">0</b>
-      <span class="pc-lab">${esc(p.label || 'seguidores')}</span>
-    </span>
-  </a>`;
+  var g = glyphSVG(p.glyph || guessGlyph(p.name));
+  var url = (p.url || '').trim();
+  return '<a class="pcard rv" style="--d:' + Math.min(i * 50, 250) + 'ms"'
+    + ' href="' + (url ? esc(url) : '#') + '"'
+    + (url ? ' target="_blank" rel="noopener"' : '')
+    + ' data-nolink="' + (url ? 0 : 1) + '">'
+    + '<span class="pc-top"><span class="pc-glyph">' + g + '</span><span class="pc-arrow">' + ICON.arrow + '</span></span>'
+    + '<span class="pc-name">' + esc(p.name) + '</span>'
+    + '<span class="pc-handle" data-handle="' + esc(p.handle) + '" title="Copiar usuario">' + esc(p.handle) + '</span>'
+    + '<span class="pc-foot"><b class="count-anim" data-count="' + esc(p.id) + '" data-target="' + (+p.count || 0) + '">0</b>'
+    + '<span class="pc-lab">' + esc(p.label || 'seguidores') + '</span></span></a>';
 }
 
-/* ============ Render general ============ */
+/* ============ Render general (protegido) ============ */
 function render(){
-  const total = state.platforms.reduce((a, p) => a + (+p.count || 0), 0);
-  const now = new Date();
+  try {
+    var plats = isArr(state.platforms) ? state.platforms : [];
+    var total = plats.reduce(function(a, p){ return a + (+p.count || 0); }, 0);
+    var now = new Date();
 
-  document.title = (state.owner ? state.owner + ' — ' : '') + 'Frases';
-  $('#heroName').textContent    = state.owner || 'Hishida';
-  $('#heroTagline').textContent = state.tagline || '';
-  $('#footOwner').textContent   = state.owner || '';
-  $('#footYear').textContent    = now.getFullYear();
-  $('#updChip').textContent = state.updatedAt
-    ? 'Actualizado el ' + new Date(state.updatedAt).toLocaleDateString('es-ES', { day:'2-digit', month:'2-digit', year:'numeric' })
-    : 'En línea';
+    document.title = (state.owner ? state.owner + ' — ' : '') + 'Frases';
+    $('#heroName').textContent    = state.owner || 'Hishida';
+    $('#heroTagline').textContent = state.tagline || '';
+    $('#footOwner').textContent   = state.owner || '';
+    $('#footYear').textContent    = now.getFullYear();
 
-  $('#statPlats').textContent  = state.platforms.length;
-  $('#statQuotes').textContent = state.phrases.length;
-  const totalEl = document.querySelector('[data-count="total"]');
-  if (totalEl) totalEl.dataset.target = total;
+    /* El punto verde "En línea" siempre está activo; solo cambia el texto */
+    $('#updChip').textContent = state.updatedAt
+      ? 'Actualizado el ' + new Date(state.updatedAt).toLocaleDateString('es-ES', { day:'2-digit', month:'2-digit', year:'numeric' })
+      : 'En línea';
 
-  const sorted = [...state.platforms].sort((a, b) => (+b.count || 0) - (+a.count || 0));
-  $('#pCount').textContent = String(sorted.length).padStart(2,'0') + (sorted.length === 1 ? ' cuenta' : ' cuentas');
-  if (!sorted.length){
-    $('#pgrid').innerHTML = `<div class="pcard empty-card rv">
-      <span class="pc-name">Sin plataformas todavía</span>
-      <span class="pc-lab">Añádelas desde el menú Fs Hishida.</span></div>`;
-  } else {
-    $('#pgrid').innerHTML = sorted.map(cardHTML).join('');
+    $('#statPlats').textContent  = plats.length;
+    $('#statQuotes').textContent = state.phrases.length;
+    var totalEl = document.querySelector('[data-count="total"]');
+    if (totalEl) totalEl.dataset.target = total;
+
+    var sorted = plats.slice().sort(function(a, b){ return (+b.count || 0) - (+a.count || 0); });
+    if (!sorted.length){
+      $('#pgrid').innerHTML = '<div class="pcard empty-card">'
+        + '<span class="pc-name">Sin plataformas todavía</span>'
+        + '<span class="pc-lab">Añádelas desde el icono de ojo (Control del sitio).</span></div>';
+    } else {
+      $('#pgrid').innerHTML = sorted.map(cardHTML).join('');
+    }
+
+    renderQuote();
+    requestAnimationFrame(runCounters);
+  } catch(err){
+    if (window.console) console.error('Error en render:', err);
   }
-
-  /* Etiquetas del segundo sistema en el menú */
-  const s2name = (state.sys2 && state.sys2.name || '').trim();
-  const s2url  = (state.sys2 && state.sys2.url  || '').trim();
-  $('#amOtherName').textContent = s2name || 'Segundo sistema';
-  $('#amOtherHint').textContent = s2url ? 'Abrir enlace' : 'Sin configurar';
-
-  renderQuote();
-  observeReveals();
-  requestAnimationFrame(runCounters);
 }
 
-/* ============ Acceso del autor ============ */
-let authMode = 'enter';
+/* ============ Control del sitio: cuenta ÚNICA del propietario ============ */
+var authMode = 'enter';
 function openAuth(){
   closeAdminMenu();
+  /* Cuenta única: si ya existe una contraseña, SIEMPRE es modo entrar.
+     Nunca se vuelve a ofrecer la creación. */
   authMode = state.admin.pass ? 'enter' : 'create';
-  $('#authTitle').textContent = authMode === 'create' ? 'Crea tu acceso único' : 'Acceso restringido';
+  $('#authTitle').textContent = authMode === 'create' ? 'Crea tu cuenta única' : 'Acceso restringido';
   $('#authSub').textContent = authMode === 'create'
-    ? 'Primera vez: define el usuario y la contraseña que solo tú conocerás. Con ellos editarás todo el sitio.'
-    : 'Introduce tu usuario y contraseña para gestionar los datos públicos.';
+    ? 'Será la única cuenta con control de tu sitio web. Una vez creada, no se podrán crear más cuentas.'
+    : 'Introduce tu usuario y contraseña de propietario.';
   $('#authUser').value = authMode === 'create' ? (state.admin.user || 'frases_hishida') : '';
   $('#authPass').value = '';
   $('#authConfirm').value = '';
   $('#authConfirmWrap').hidden = authMode !== 'create';
-  $('#authSubmit').textContent = authMode === 'create' ? 'Crear y entrar' : 'Entrar';
+  $('#authSubmit').textContent = authMode === 'create' ? 'Crear cuenta y entrar' : 'Entrar';
   $('#authReset').hidden = authMode === 'create';
   $('#authError').hidden = true;
   authOverlay.classList.add('open');
-  setTimeout(() => $('#authUser').focus(), 300);
+  syncScrollLock();
+  setTimeout(function(){ $('#authUser').focus(); }, 300);
 }
-function closeAuth(){ authOverlay.classList.remove('open'); }
-function authErr(msg){ const e = $('#authError'); e.textContent = msg; e.hidden = false; }
+function closeAuth(){
+  authOverlay.classList.remove('open');
+  syncScrollLock();
+}
+function authErr(msg){
+  var e = $('#authError');
+  e.textContent = msg;
+  e.hidden = false;
+}
 
- $('#authForm').addEventListener('submit', e => {
+ $('#authForm').addEventListener('submit', function(e){
   e.preventDefault();
-  const u  = $('#authUser').value.trim();
-  const p1 = $('#authPass').value, p2 = $('#authConfirm').value;
+  var u = $('#authUser').value.trim();
+  var p1 = $('#authPass').value, p2 = $('#authConfirm').value;
   if (authMode === 'create'){
-    if (u.length < 3)  return authErr('El usuario debe tener al menos 3 caracteres.');
-    if (p1.length < 4) return authErr('La contraseña debe tener al menos 4 caracteres.');
-    if (p1 !== p2)     return authErr('Las contraseñas no coinciden.');
+    if (state.admin.pass){ authMode = 'enter'; authErr('Ya existe una cuenta. Inicia sesión.'); return; }
+    if (u.length < 3)  { authErr('El usuario debe tener al menos 3 caracteres.'); return; }
+    if (p1.length < 4) { authErr('La contraseña debe tener al menos 4 caracteres.'); return; }
+    if (p1 !== p2)     { authErr('Las contraseñas no coinciden.'); return; }
     state.admin = { user: u, pass: hashStr(p1) };
     persist();
     unlocked = true;
     closeAuth();
     openDrawer();
-    toast('Acceso creado. Sesión iniciada.');
+    toast('Cuenta única creada. Sesión iniciada.');
   } else {
     if (u === state.admin.user && hashStr(p1) === state.admin.pass){
       unlocked = true;
@@ -999,18 +1069,18 @@ function authErr(msg){ const e = $('#authError'); e.textContent = msg; e.hidden 
     }
   }
 });
- $('#authToggle').onclick = () => {
-  const i = $('#authPass');
-  const show = i.type === 'password';
+ $('#authToggle').onclick = function(){
+  var i = $('#authPass');
+  var show = i.type === 'password';
   i.type = show ? 'text' : 'password';
   $('#authToggle').textContent = show ? 'Ocultar' : 'Mostrar';
 };
-let resetArmed = false, resetTimer;
- $('#authReset').onclick = () => {
+var resetArmed = false, resetTimer;
+ $('#authReset').onclick = function(){
   if (!resetArmed){
     resetArmed = true;
     $('#authReset').textContent = 'Pulsa otra vez para borrar TODO';
-    resetTimer = setTimeout(() => {
+    resetTimer = setTimeout(function(){
       resetArmed = false;
       $('#authReset').textContent = '¿Olvidaste tus datos? Restablecer todo';
     }, 3500);
@@ -1025,19 +1095,20 @@ let resetArmed = false, resetTimer;
   closeAuth();
   render();
   openDrawer();
-  toast('Sitio restablecido a los datos de ejemplo.');
+  toast('Sitio restablecido. Vuelve a crear tu cuenta única.');
 };
  $('#authClose').onclick = closeAuth;
-authOverlay.addEventListener('click', e => { if (e.target === e.currentTarget) closeAuth(); });
+authOverlay.addEventListener('click', function(e){
+  if (e.target === e.currentTarget) closeAuth();
+});
 
-/* ============ Panel del autor ============ */
-let draft = null;
+/* ============ Panel del propietario ============ */
+var draft = null;
 function openDrawer(){
   if (!unlocked){ openAuth(); return; }
   draft = clone(state);
   $('#edOwner').value = draft.owner || '';
   $('#edTagline').value = draft.tagline || '';
-  $('#edSys2Name').value = (draft.sys2 && draft.sys2.name) || '';
   $('#edSys2Url').value  = (draft.sys2 && draft.sys2.url)  || '';
   $('#edAdminUser').value = draft.admin.user || '';
   $('#edNewPass').value = '';
@@ -1046,107 +1117,109 @@ function openDrawer(){
   renderEdPlats();
   drawerEl.classList.add('open');
   $('#drawerOverlay').classList.add('open');
+  syncScrollLock();
 }
 function closeDrawer(){
   drawerEl.classList.remove('open');
   $('#drawerOverlay').classList.remove('open');
+  syncScrollLock();
 }
 
 function renderEdQuotes(){
-  const wrap = $('#edQuotes');
+  var wrap = $('#edQuotes');
   $('#edQCount').textContent = '(' + draft.phrases.length + ')';
   if (!draft.phrases.length){
     wrap.innerHTML = '<p class="ed-empty">Sin frases. Añade la primera con “+ añadir”.</p>';
     return;
   }
-  wrap.innerHTML = draft.phrases.map(q => {
-    const who = q.by === 'community'
+  wrap.innerHTML = draft.phrases.map(function(q){
+    var who = q.by === 'community'
       ? 'Comunidad' + (q.author ? ' · ' + esc(q.author) : '')
       : 'Tuya';
-    return `<div class="ed-item" data-id="${esc(q.id)}">
-      <div class="ed-head">
-        <span class="ed-badge q">“</span>
-        <input class="ed-name" data-field="text" value="${esc(q.text)}" placeholder="Escribe tu frase…">
-        <span class="ed-who">${who}</span>
-        <button type="button" class="ed-del" aria-label="Eliminar">${ICON.trash}</button>
-      </div>
-      <div class="ed-grid">
-        <label class="field wide"><span>Tema (opcional)</span><input class="input" data-field="tag" value="${esc(q.tag || '')}" placeholder="Amor, calma, superación…"></label>
-      </div>
-    </div>`;
+    return '<div class="ed-item" data-id="' + esc(q.id) + '">'
+      + '<div class="ed-head"><span class="ed-badge q">“</span>'
+      + '<input class="ed-name" data-field="text" value="' + esc(q.text) + '" placeholder="Escribe tu frase…">'
+      + '<span class="ed-who">' + who + '</span>'
+      + '<button type="button" class="ed-del" aria-label="Eliminar">' + ICON.trash + '</button></div>'
+      + '<div class="ed-grid"><label class="field wide"><span>Tema (opcional)</span>'
+      + '<input class="input" data-field="tag" value="' + esc(q.tag || '') + '" placeholder="Amor, calma…"></label></div></div>';
   }).join('');
 }
 function renderEdPlats(){
-  const wrap = $('#edPlats');
+  var wrap = $('#edPlats');
   $('#edPCount').textContent = '(' + draft.platforms.length + ')';
   if (!draft.platforms.length){
     wrap.innerHTML = '<p class="ed-empty">Sin plataformas. Añade la primera.</p>';
     return;
   }
-  wrap.innerHTML = draft.platforms.map(p => {
-    const g = p.glyph || guessGlyph(p.name);
-    return `<div class="ed-item" data-id="${esc(p.id)}">
-      <div class="ed-head">
-        <span class="ed-badge">${glyphSVG(g)}</span>
-        <input class="ed-name" data-field="name" value="${esc(p.name)}" placeholder="Nombre de la plataforma">
-        <button type="button" class="ed-del" aria-label="Eliminar">${ICON.trash}</button>
-      </div>
-      <div class="ed-grid">
-        <label class="field"><span>Usuario</span><input class="input" data-field="handle" value="${esc(p.handle)}" placeholder="@usuario"></label>
-        <label class="field"><span>Cantidad</span><input class="input" data-field="count" type="number" min="0" inputmode="numeric" value="${+p.count || 0}"></label>
-        <label class="field"><span>Etiqueta</span><input class="input" data-field="label" value="${esc(p.label)}" placeholder="seguidores"></label>
-        <label class="field"><span>Enlace</span><input class="input" data-field="url" value="${esc(p.url)}" placeholder="https://…"></label>
-      </div>
-      <div class="gprow">${Object.keys(BRANDS).map(k =>
-        `<button type="button" class="gp ${k === g ? 'sel' : ''}" data-glyph="${k}" aria-label="${k}">${glyphSVG(k)}</button>`
-      ).join('')}</div>
-    </div>`;
+  wrap.innerHTML = draft.platforms.map(function(p){
+    var g = p.glyph || guessGlyph(p.name);
+    var gps = Object.keys(BRANDS).map(function(k){
+      return '<button type="button" class="gp ' + (k === g ? 'sel' : '') + '" data-glyph="' + k + '" aria-label="' + k + '">' + glyphSVG(k) + '</button>';
+    }).join('');
+    return '<div class="ed-item" data-id="' + esc(p.id) + '">'
+      + '<div class="ed-head"><span class="ed-badge">' + glyphSVG(g) + '</span>'
+      + '<input class="ed-name" data-field="name" value="' + esc(p.name) + '" placeholder="Nombre de la plataforma">'
+      + '<button type="button" class="ed-del" aria-label="Eliminar">' + ICON.trash + '</button></div>'
+      + '<div class="ed-grid">'
+      + '<label class="field"><span>Usuario</span><input class="input" data-field="handle" value="' + esc(p.handle) + '" placeholder="@usuario"></label>'
+      + '<label class="field"><span>Cantidad</span><input class="input" data-field="count" type="number" min="0" inputmode="numeric" value="' + (+p.count || 0) + '"></label>'
+      + '<label class="field"><span>Etiqueta</span><input class="input" data-field="label" value="' + esc(p.label) + '" placeholder="seguidores"></label>'
+      + '<label class="field"><span>Enlace</span><input class="input" data-field="url" value="' + esc(p.url) + '" placeholder="https://…"></label>'
+      + '</div><div class="gprow">' + gps + '</div></div>';
   }).join('');
 }
 
-drawerEl.addEventListener('input', e => {
-  const f = e.target.dataset.field;
+drawerEl.addEventListener('input', function(e){
+  var f = e.target.dataset.field;
   if (!f) return;
-  const item = e.target.closest('.ed-item');
+  var item = e.target.closest('.ed-item');
   if (!item) return;
   if (item.closest('#edQuotes')){
-    const q = draft.phrases.find(x => x.id === item.dataset.id);
+    var q = null;
+    draft.phrases.forEach(function(x){ if (x.id === item.dataset.id) q = x; });
     if (q) q[f] = e.target.value;
   } else {
-    const p = draft.platforms.find(x => x.id === item.dataset.id);
+    var p = null;
+    draft.platforms.forEach(function(x){ if (x.id === item.dataset.id) p = x; });
     if (!p) return;
     if (f === 'count') p.count = Math.max(0, parseInt(e.target.value, 10) || 0);
     else p[f] = e.target.value;
     if (f === 'name' && p._auto){
       p.glyph = guessGlyph(e.target.value);
       item.querySelector('.ed-badge').innerHTML = glyphSVG(p.glyph);
-      item.querySelectorAll('.gp').forEach(b => b.classList.toggle('sel', b.dataset.glyph === p.glyph));
+      item.querySelectorAll('.gp').forEach(function(b){
+        if (b.dataset.glyph === p.glyph) b.classList.add('sel'); else b.classList.remove('sel');
+      });
     }
   }
 });
-drawerEl.addEventListener('click', e => {
-  const item = e.target.closest('.ed-item');
+drawerEl.addEventListener('click', function(e){
+  var item = e.target.closest('.ed-item');
   if (!item) return;
-  const gp = e.target.closest('.gp');
+  var gp = e.target.closest('.gp');
   if (gp){
-    const p = draft.platforms.find(x => x.id === item.dataset.id);
+    var p = null;
+    draft.platforms.forEach(function(x){ if (x.id === item.dataset.id) p = x; });
     if (!p) return;
     p.glyph = gp.dataset.glyph;
     p._auto = false;
     item.querySelector('.ed-badge').innerHTML = glyphSVG(p.glyph);
-    item.querySelectorAll('.gp').forEach(b => b.classList.toggle('sel', b === gp));
+    item.querySelectorAll('.gp').forEach(function(b){
+      if (b === gp) b.classList.add('sel'); else b.classList.remove('sel');
+    });
     return;
   }
-  const del = e.target.closest('.ed-del');
+  var del = e.target.closest('.ed-del');
   if (del){
     if (del.classList.contains('armed')){
-      if (item.closest('#edQuotes')) draft.phrases = draft.phrases.filter(x => x.id !== item.dataset.id);
-      else draft.platforms = draft.platforms.filter(x => x.id !== item.dataset.id);
-      item.closest('#edQuotes') ? renderEdQuotes() : renderEdPlats();
+      if (item.closest('#edQuotes')) draft.phrases = draft.phrases.filter(function(x){ return x.id !== item.dataset.id; });
+      else draft.platforms = draft.platforms.filter(function(x){ return x.id !== item.dataset.id; });
+      if (item.closest('#edQuotes')) renderEdQuotes(); else renderEdPlats();
     } else {
       del.classList.add('armed');
       del.textContent = '¿Seguro?';
-      setTimeout(() => {
+      setTimeout(function(){
         if (document.body.contains(del)){
           del.classList.remove('armed');
           del.innerHTML = ICON.trash;
@@ -1155,50 +1228,58 @@ drawerEl.addEventListener('click', e => {
     }
   }
 });
- $('#edAddQ').onclick = () => {
+ $('#edAddQ').onclick = function(){
   draft.phrases.push({ id: uid(), text:'', tag:'', by:'admin', author:'' });
   renderEdQuotes();
-  const last = $('#edQuotes').lastElementChild;
-  if (last){ last.scrollIntoView({ behavior:'smooth', block:'center' }); last.querySelector('.ed-name')?.focus(); }
+  var last = $('#edQuotes').lastElementChild;
+  if (last){
+    last.scrollIntoView({ behavior:'smooth', block:'center' });
+    var inp = last.querySelector('.ed-name');
+    if (inp) inp.focus();
+  }
 };
- $('#edAddP').onclick = () => {
+ $('#edAddP').onclick = function(){
   draft.platforms.push({ id: uid(), name:'', handle:'', count:0, url:'', label:'', glyph:'asterisk', _auto:true });
   renderEdPlats();
-  const last = $('#edPlats').lastElementChild;
-  if (last){ last.scrollIntoView({ behavior:'smooth', block:'center' }); last.querySelector('.ed-name')?.focus(); }
+  var last = $('#edPlats').lastElementChild;
+  if (last){
+    last.scrollIntoView({ behavior:'smooth', block:'center' });
+    var inp2 = last.querySelector('.ed-name');
+    if (inp2) inp2.focus();
+  }
 };
- $('#edSave').onclick = () => {
-  document.querySelectorAll('.ed-name.err').forEach(el => el.classList.remove('err'));
+ $('#edSave').onclick = function(){
+  document.querySelectorAll('.ed-name.err').forEach(function(el){ el.classList.remove('err'); });
   if (!$('#edOwner').value.trim()){ toast('El nombre público no puede quedar vacío.'); $('#edOwner').focus(); return; }
-  draft.phrases = draft.phrases.filter(q => q.text.trim());
-  for (const q of draft.phrases){
+  draft.phrases = draft.phrases.filter(function(q){ return q.text.trim(); });
+  for (var i = 0; i < draft.phrases.length; i++){
+    var q = draft.phrases[i];
     if (!q.text.trim()){
-      const el = document.querySelector(`#edQuotes .ed-item[data-id="${q.id}"] .ed-name`);
+      var el = document.querySelector('#edQuotes .ed-item[data-id="' + q.id + '"] .ed-name');
       if (el){ el.classList.add('err'); el.scrollIntoView({ block:'center', behavior:'smooth' }); }
       toast('Hay una frase vacía.');
       return;
     }
   }
-  draft.platforms = draft.platforms.filter(p =>
-    !(!p.name.trim() && !p.handle.trim() && !(+p.count) && !p.url.trim()));
-  for (const p of draft.platforms){
-    if (!p.name.trim()){
-      const el = document.querySelector(`#edPlats .ed-item[data-id="${p.id}"] .ed-name`);
-      if (el){ el.classList.add('err'); el.scrollIntoView({ block:'center', behavior:'smooth' }); }
+  draft.platforms = draft.platforms.filter(function(p){
+    return !(!p.name.trim() && !p.handle.trim() && !(+p.count) && !p.url.trim());
+  });
+  for (var j = 0; j < draft.platforms.length; j++){
+    var p2 = draft.platforms[j];
+    if (!p2.name.trim()){
+      var el2 = document.querySelector('#edPlats .ed-item[data-id="' + p2.id + '"] .ed-name');
+      if (el2){ el2.classList.add('err'); el2.scrollIntoView({ block:'center', behavior:'smooth' }); }
       toast('Hay una plataforma sin nombre.');
       return;
     }
   }
-  draft.sys2 = {
-    name: $('#edSys2Name').value.trim(),
-    url:  $('#edSys2Url').value.trim()
-  };
-  const nu = $('#edAdminUser').value.trim();
+  draft.sys2 = { name: 'Sitio web 2', url: $('#edSys2Url').value.trim() };
+  var nu = $('#edAdminUser').value.trim();
   if (nu){
     if (nu.length < 3){ toast('El usuario debe tener al menos 3 caracteres.'); return; }
     draft.admin.user = nu;
   }
-  const n1 = $('#edNewPass').value, n2 = $('#edNewPass2').value;
+  var n1 = $('#edNewPass').value, n2 = $('#edNewPass2').value;
   if (n1 || n2){
     if (n1.length < 4){ toast('La nueva contraseña debe tener al menos 4 caracteres.'); return; }
     if (n1 !== n2)    { toast('Las contraseñas nuevas no coinciden.'); return; }
@@ -1216,13 +1297,22 @@ drawerEl.addEventListener('click', e => {
 };
  $('#edDiscard').onclick = closeDrawer;
  $('#drawerClose').onclick = closeDrawer;
- $('#lockBtn').onclick = () => { unlocked = false; closeDrawer(); toast('Sesión cerrada.'); };
+ $('#lockBtn').onclick = function(){
+  unlocked = false;
+  closeDrawer();
+  toast('Sesión cerrada.');
+};
  $('#drawerOverlay').addEventListener('click', closeDrawer);
 
 /* ============ Atajos ============ */
-addEventListener('keydown', e => {
-  if (e.altKey && e.shiftKey && (e.key === 'E' || e.key === 'e')){ e.preventDefault(); unlocked ? openDrawer() : openAuth(); }
-  if (e.key === 'Enter' && e.target.dataset && e.target.dataset.handle){ copyText(e.target.dataset.handle); }
+addEventListener('keydown', function(e){
+  if (e.altKey && e.shiftKey && (e.key === 'E' || e.key === 'e')){
+    e.preventDefault();
+    if (unlocked) openDrawer(); else openAuth();
+  }
+  if (e.key === 'Enter' && e.target.dataset && e.target.dataset.handle){
+    copyText(e.target.dataset.handle);
+  }
   if (e.key === 'Escape'){
     if (adminMenu.classList.contains('open')) closeAdminMenu();
     else if (authOverlay.classList.contains('open')) closeAuth();
@@ -1231,11 +1321,19 @@ addEventListener('keydown', e => {
 });
 
 /* ============ Copiar usuario / enlace faltante ============ */
-document.addEventListener('click', e => {
-  const h = e.target.closest('[data-handle]');
-  if (h){ e.preventDefault(); e.stopPropagation(); copyText(h.dataset.handle); return; }
-  const nl = e.target.closest('[data-nolink="1"]');
-  if (nl){ e.preventDefault(); toast('Añade un enlace desde el menú Fs Hishida.'); }
+document.addEventListener('click', function(e){
+  var h = e.target.closest('[data-handle]');
+  if (h){
+    e.preventDefault();
+    e.stopPropagation();
+    copyText(h.dataset.handle);
+    return;
+  }
+  var nl = e.target.closest('[data-nolink="1"]');
+  if (nl){
+    e.preventDefault();
+    toast('Añade un enlace desde el icono de ojo (Control del sitio).');
+  }
 });
 
 /* ============ Inicio ============ */
