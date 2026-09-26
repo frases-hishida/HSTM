@@ -17,10 +17,10 @@
     --hair:rgba(245,245,242,.28);
     --soft:rgba(245,245,242,.055);
     --shadow:0 24px 55px -28px rgba(0,0,0,.85);
-    /* Oscuro translúcido visible para hover / selección */
-    --press:rgba(0,0,0,.48);
-    --press-2:rgba(0,0,0,.66);
-    --press-line:rgba(245,245,242,.34);
+    /* Oscuro translúcido SUAVE */
+    --press:rgba(0,0,0,.26);
+    --press-2:rgba(0,0,0,.40);
+    --press-line:rgba(245,245,242,.28);
   }
   :root[data-theme="light"]{
     --bg:#FAFAF8; --bg-soft:rgba(250,250,248,.72);
@@ -30,9 +30,10 @@
     --hair:rgba(16,16,18,.26);
     --soft:rgba(16,16,18,.045);
     --shadow:0 24px 50px -28px rgba(16,16,18,.22);
-    --press:rgba(16,16,18,.09);
-    --press-2:rgba(16,16,18,.16);
-    --press-line:rgba(16,16,18,.34);
+    /* Rojo claro transparente */
+    --press:rgba(226,72,58,.10);
+    --press-2:rgba(226,72,58,.20);
+    --press-line:rgba(226,72,58,.42);
   }
   *{margin:0;padding:0;box-sizing:border-box}
   html{scroll-behavior:smooth;scroll-padding-top:90px}
@@ -56,28 +57,56 @@
     border-bottom:1px solid var(--line);transition:background-color .5s,border-color .5s;
   }
   .nav-in{max-width:1120px;margin:0 auto;display:flex;align-items:center;gap:14px;padding:11px clamp(18px,4vw,40px)}
+
+  /* Menú de sistemas */
+  .admin-wrap{position:relative;flex:none}
   .admin-btn{
-    display:flex;align-items:center;gap:9px;flex:none;
-    padding:5px 13px 5px 5px;border:1px solid var(--line);border-radius:999px;
+    display:flex;align-items:center;gap:9px;
+    padding:5px 12px 5px 5px;border:1px solid var(--line);border-radius:999px;
     transition:border-color .25s,background-color .25s;
   }
-  .admin-btn:hover{background:var(--press);border-color:var(--press-line)}
-  .admin-btn:active{background:var(--press-2)}
+  .admin-btn:hover,.admin-btn.active{background:var(--press);border-color:var(--press-line)}
   .ab-fs{
     width:30px;height:30px;border-radius:50%;background:var(--fg);color:var(--bg);
     display:grid;place-items:center;font-family:'Space Grotesk';font-weight:700;font-size:12px;flex:none;
     transition:background-color .5s,color .5s;
   }
   .ab-name{font-family:'Space Grotesk';font-weight:600;font-size:13px;letter-spacing:.02em;white-space:nowrap}
-  .ab-lock{width:11px;height:11px;opacity:0;transition:opacity .25s;flex:none}
-  .admin-btn:hover .ab-lock{opacity:.65}
+  .ab-chev{width:11px;height:11px;transition:transform .3s;opacity:.6}
+  .admin-btn.active .ab-chev{transform:rotate(180deg)}
+  .admin-menu{
+    position:absolute;top:calc(100% + 10px);left:0;z-index:80;
+    width:250px;background:var(--card);border:1px solid var(--line);border-radius:18px;
+    box-shadow:var(--shadow);padding:8px;
+    opacity:0;transform:translateY(-6px) scale(.98);pointer-events:none;
+    transition:opacity .25s,transform .25s,background-color .5s,border-color .5s;
+  }
+  .admin-menu.open{opacity:1;transform:none;pointer-events:auto}
+  .am-label{
+    display:block;font-family:'Space Grotesk';font-size:9px;font-weight:600;
+    letter-spacing:.16em;text-transform:uppercase;color:var(--mut);padding:6px 10px 8px;
+  }
+  .am-item{
+    width:100%;display:flex;align-items:center;gap:11px;text-align:left;
+    padding:10px 10px;border-radius:12px;
+    transition:background-color .2s,border-color .2s;border:1px solid transparent;
+  }
+  .am-item:hover{background:var(--press);border-color:var(--press-line)}
+  .am-ico{
+    width:32px;height:32px;border:1px solid var(--line);border-radius:10px;flex:none;
+    display:grid;place-items:center;
+  }
+  .am-ico svg{width:14px;height:14px}
+  .am-text{display:flex;flex-direction:column;gap:1px;min-width:0}
+  .am-text b{font-size:13.5px;font-weight:700;letter-spacing:-.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .am-text small{font-family:'Space Grotesk';font-size:9.5px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--mut)}
+
   .nav-links{display:flex;gap:22px;margin-left:auto}
   .nav-links a{font-size:13px;font-weight:600;color:var(--mut);text-decoration:none;transition:color .25s}
   .nav-links a:hover{color:var(--fg)}
   .icon-btn{
     width:36px;height:36px;border-radius:50%;border:1px solid var(--line);flex:none;
-    display:grid;place-items:center;
-    transition:background-color .25s,border-color .25s;
+    display:grid;place-items:center;transition:background-color .25s,border-color .25s;
   }
   .icon-btn:hover{background:var(--press);border-color:var(--press-line)}
   .icon-btn:active{background:var(--press-2)}
@@ -102,7 +131,6 @@
     transition:background-color .25s,border-color .25s;
   }
   .add-btn:hover{background:var(--press);border-color:var(--press-line)}
-  .add-btn:active{background:var(--press-2)}
   .ghost-btn{
     background:none;border:0;cursor:pointer;font-size:12px;font-weight:600;color:var(--mut);
     text-decoration:underline;text-underline-offset:3px;transition:color .2s;padding:2px 0;
@@ -193,7 +221,6 @@
     padding:14px 14px 15px;text-decoration:none;
     transition:background-color .3s,border-color .3s,transform .3s,box-shadow .3s;
   }
-  /* Al seleccionar: oscuro translúcido visible, sin invertir a blanco */
   .pcard:hover{
     background:var(--press);border-color:var(--press-line);
     transform:translateY(-2px);box-shadow:var(--shadow);
@@ -321,7 +348,6 @@
   .gp svg{width:16px;height:16px}
   .gp:hover{background:var(--press);border-color:var(--press-line)}
   .gp.sel{background:var(--press);border-color:var(--fg)}
-  .gp.sel:active{background:var(--press-2)}
   .ed-empty{color:var(--mut);font-size:13px;padding:12px 2px}
 
   /* ---------- Toast ---------- */
@@ -385,6 +411,836 @@
 
 <nav class="nav">
   <div class="nav-in">
-    <button class="admin-btn" id="adminBtn" title="Acceso del autor" aria-label="Acceso del autor">
-      <span class="ab-fs">Fs</span>
-      <span class
+    <!-- Menú de sistemas -->
+    <div class="admin-wrap">
+      <button class="admin-btn" id="adminBtn" aria-haspopup="true" aria-expanded="false" aria-label="Menú de sistemas">
+        <span class="ab-fs">Fs</span>
+        <span class="ab-name">Hishida</span>
+        <svg class="ab-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+      </button>
+      <div class="admin-menu" id="adminMenu" role="menu">
+        <span class="am-label">Sistemas</span>
+        <button class="am-item" id="amThis" role="menuitem">
+          <span class="am-ico">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 9.5c0-3 2-5 5-5M19.5 9.5c0-3-2-5-5-5"/><path d="M6.5 13.5h4v6h-3a3 3 0 0 1-1-6zM13.5 13.5h4v6h-3a3 3 0 0 1-1-6z" transform="scale(.9) translate(1.3,1)"/></svg>
+          </span>
+          <span class="am-text"><b>Sistema de frases</b><small>Editar este sitio</small></span>
+        </button>
+        <button class="am-item" id="amOther" role="menuitem">
+          <span class="am-ico">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4h6v6M20 4l-9 9"/><path d="M19 13.5V18a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h4.5"/></svg>
+          </span>
+          <span class="am-text"><b id="amOtherName">Segundo sistema</b><small id="amOtherHint">Sin configurar</small></span>
+        </button>
+      </div>
+    </div>
+
+    <div class="nav-links">
+      <a href="#frases">Frases</a>
+      <a href="#plataformas">Plataformas</a>
+    </div>
+    <button class="icon-btn" id="themeBtn" aria-label="Cambiar tema" title="Claro / oscuro">
+      <svg id="themeIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></svg>
+    </button>
+  </div>
+</nav>
+
+<main class="wrap">
+
+  <section class="hero" id="inicio">
+    <span class="kicker rv">Creador de frases</span>
+    <h1 class="rv" style="--d:60ms" id="heroName"></h1>
+    <p class="tagline rv" style="--d:120ms" id="heroTagline"></p>
+    <span class="chip rv" style="--d:180ms"><i class="pulse"></i><span id="updChip"></span></span>
+  </section>
+
+  <section id="frases">
+    <div class="sec-head rv">
+      <span class="sec-title">Frases</span>
+      <span class="sec-count" id="qIdx"></span>
+    </div>
+    <div class="qcard rv" style="--d:80ms" id="qCard">
+      <div class="q-top">
+        <span class="chip" id="qTagChip">Frase</span>
+      </div>
+      <div id="qTextWrap"><p class="q-text"></p></div>
+      <div class="q-controls">
+        <button class="icon-btn" id="qPrev" aria-label="Frase anterior">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 6.5L9 12l5.5 5.5"/></svg>
+        </button>
+        <button class="icon-btn" id="qNext" aria-label="Frase siguiente">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 6.5L15 12l-5.5 5.5"/></svg>
+        </button>
+        <div class="q-prog"><div id="qProgFill"></div></div>
+        <button class="btn ghost q-copy-btn" id="qCopy">Copiar</button>
+      </div>
+    </div>
+
+    <form class="qform rv" style="--d:140ms" id="qForm" novalidate>
+      <div class="qform-row">
+        <input class="input" id="qFormPhrase" maxlength="180" placeholder="Deja tu frase para el mundo…" autocomplete="off">
+        <input class="input" id="qFormName" maxlength="24" placeholder="Tu nombre (opcional)" autocomplete="off">
+        <button type="submit" class="btn primary" id="qSubmit">Publicar</button>
+      </div>
+      <p class="qform-note">Tu frase se publica al instante. Solo Hishida puede eliminarla.</p>
+    </form>
+  </section>
+
+  <section id="stats" class="rv">
+    <div class="stats">
+      <div class="stat">
+        <span class="stat-num count-anim" data-count="total" data-target="0">0</span>
+        <span class="stat-lab">Alcance combinado</span>
+      </div>
+      <div class="stat">
+        <span class="stat-num" id="statPlats">0</span>
+        <span class="stat-lab">Plataformas</span>
+      </div>
+      <div class="stat">
+        <span class="stat-num" id="statQuotes">0</span>
+        <span class="stat-lab">Frases publicadas</span>
+      </div>
+    </div>
+  </section>
+
+  <section id="plataformas">
+    <div class="sec-head rv">
+      <span class="sec-title">Plataformas</span>
+      <span class="sec-count" id="pCount"></span>
+    </div>
+    <div class="pgrid" id="pgrid"></div>
+  </section>
+
+  <footer>
+    <span class="mini">© <span id="footYear"></span> · <span id="footOwner"></span></span>
+    <span class="mini">frases_hishida</span>
+  </footer>
+
+</main>
+
+<!-- ===== Acceso del autor ===== -->
+<div class="overlay" id="authOverlay">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="authTitle">
+    <div class="modal-head">
+      <span class="kicker">Fs Hishida · Acceso</span>
+      <button class="icon-btn sm" id="authClose" aria-label="Cerrar">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
+    </div>
+    <h3 id="authTitle">Acceso restringido</h3>
+    <p class="modal-sub" id="authSub"></p>
+    <form id="authForm" novalidate>
+      <label class="field full"><span>Usuario</span>
+        <input class="input" id="authUser" autocomplete="off" spellcheck="false">
+      </label>
+      <label class="field full"><span>Contraseña</span>
+        <input class="input" type="password" id="authPass" autocomplete="off">
+      </label>
+      <label class="field full" id="authConfirmWrap" hidden><span>Repetir contraseña</span>
+        <input class="input" type="password" id="authConfirm" autocomplete="off">
+      </label>
+      <button type="button" class="ghost-btn" id="authToggle">Mostrar</button>
+      <p class="form-error" id="authError" hidden></p>
+      <button type="submit" class="btn primary full" id="authSubmit">Entrar</button>
+      <button type="button" class="ghost-btn" id="authReset" hidden style="align-self:center">¿Olvidaste tus datos? Restablecer todo</button>
+    </form>
+  </div>
+</div>
+
+<div class="overlay" id="drawerOverlay"></div>
+
+<!-- ===== Panel del autor ===== -->
+<aside class="drawer" id="drawer" role="dialog" aria-modal="true" aria-label="Panel del autor">
+  <header class="drawer-head">
+    <div>
+      <span class="kicker">Fs Hishida</span>
+      <h3>Tus datos públicos</h3>
+    </div>
+    <div class="drawer-actions">
+      <button class="icon-btn sm" id="lockBtn" title="Cerrar sesión" aria-label="Cerrar sesión">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="5.5" y="10.5" width="13" height="9" rx="2"/><path d="M8.5 10.5V8a3.5 3.5 0 0 1 7 0v2.5"/></svg>
+      </button>
+      <button class="icon-btn sm" id="drawerClose" title="Cerrar" aria-label="Cerrar">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <div class="drawer-body">
+    <section class="ed-sec">
+      <span class="ed-title">Identidad</span>
+      <div class="ed-stack" style="margin-top:12px">
+        <label class="field"><span>Nombre público</span><input class="input" id="edOwner"></label>
+        <label class="field"><span>Descripción breve</span><input class="input" id="edTagline"></label>
+      </div>
+    </section>
+
+    <section class="ed-sec">
+      <div class="ed-row">
+        <span class="ed-title">Frases <span id="edQCount"></span></span>
+        <button class="add-btn" id="edAddQ">+ Añadir</button>
+      </div>
+      <div id="edQuotes"></div>
+    </section>
+
+    <section class="ed-sec">
+      <div class="ed-row">
+        <span class="ed-title">Plataformas <span id="edPCount"></span></span>
+        <button class="add-btn" id="edAddP">+ Añadir</button>
+      </div>
+      <div id="edPlats"></div>
+    </section>
+
+    <section class="ed-sec">
+      <span class="ed-title">Segundo sistema (menú superior)</span>
+      <div class="ed-stack" style="margin-top:12px">
+        <label class="field"><span>Nombre</span><input class="input" id="edSys2Name" placeholder="Ej. Panel de videos"></label>
+        <label class="field"><span>Enlace (URL)</span><input class="input" id="edSys2Url" placeholder="https://…"></label>
+      </div>
+    </section>
+
+    <section class="ed-sec">
+      <span class="ed-title">Seguridad</span>
+      <div class="ed-stack" style="margin-top:12px">
+        <label class="field"><span>Usuario</span><input class="input" id="edAdminUser" autocomplete="off" spellcheck="false"></label>
+        <label class="field"><span>Nueva contraseña (opcional)</span><input class="input" type="password" id="edNewPass" autocomplete="off"></label>
+        <label class="field"><span>Repetir</span><input class="input" type="password" id="edNewPass2" autocomplete="off"></label>
+      </div>
+    </section>
+  </div>
+
+  <footer class="drawer-foot">
+    <span class="mini">Los datos se guardan solo en este navegador.</span>
+    <div class="drawer-foot-btns">
+      <button class="btn ghost" id="edDiscard">Descartar</button>
+      <button class="btn primary" id="edSave">Guardar</button>
+    </div>
+  </footer>
+</aside>
+
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+/* ============ Utilidades ============ */
+const $  = s => document.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const uid = () => (crypto.randomUUID ? crypto.randomUUID() : 'x' + Date.now() + Math.random().toString(36).slice(2));
+const clone = o => JSON.parse(JSON.stringify(o));
+const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+function hashStr(s){ let h = 5381; for (let i = 0; i < s.length; i++) h = ((h << 5) + h + s.charCodeAt(i)) >>> 0; return 'h' + h.toString(36); }
+const fmtInt = n => Math.round(n).toLocaleString('es-ES');
+
+/* Formato compacto sin decimales: 850 / 1 mil / 509 mil / 1 M */
+function fmtCompact(n){
+  n = Math.round(n);
+  if (n < 1000) return String(n);
+  if (n >= 999500) return Math.round(n / 1e6) + ' M';
+  return Math.round(n / 1000) + ' mil';
+}
+
+function copyText(t){
+  const done = () => toast('Copiado: ' + t);
+  const fallback = () => {
+    const ta = document.createElement('textarea');
+    ta.value = t; ta.style.cssText = 'position:fixed;opacity:0';
+    document.body.appendChild(ta); ta.select();
+    try { document.execCommand('copy'); done(); } catch(e){ toast('No se pudo copiar.'); }
+    ta.remove();
+  };
+  if (navigator.clipboard && window.isSecureContext){
+    navigator.clipboard.writeText(t).then(done).catch(fallback);
+  } else fallback();
+}
+
+/* =========================================================
+   ICONOS OFICIALES CON COLOR DE MARCA
+========================================================= */
+const TT_PATH = 'M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z';
+
+const BRANDS = {
+  facebook: { color:'#1877F2', d:'M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z' },
+  youtube:  { color:'#FF0000', d:'M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z' },
+  whatsapp: { color:'#25D366', d:'M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z' },
+  instagram:{ color:'url(#igGrad)', d:'M12 0C8.74 0 8.333.015 7.053.072 5.775.132 4.905.333 4.14.63c-.789.306-1.459.717-2.126 1.384S.935 3.35.63 4.14C.333 4.905.131 5.775.072 7.053.012 8.333 0 8.74 0 12s.015 3.667.072 4.947c.06 1.277.261 2.148.558 2.913.306.788.717 1.459 1.384 2.126.667.666 1.336 1.079 2.126 1.384.766.296 1.636.499 2.913.558C8.333 23.988 8.74 24 12 24s3.667-.015 4.947-.072c1.277-.06 2.148-.262 2.913-.558.788-.306 1.459-.718 2.126-1.384.666-.667 1.079-1.335 1.384-2.126.296-.765.499-1.636.558-2.913.06-1.28.072-1.687.072-4.947s-.015-3.667-.072-4.947c-.06-1.277-.262-2.149-.558-2.913-.306-.789-.718-1.459-1.384-2.126C21.319 1.347 20.651.935 19.86.63c-.765-.297-1.636-.499-2.913-.558C15.667.012 15.26 0 12 0zm0 2.16c3.203 0 3.585.016 4.85.071 1.17.055 1.805.249 2.227.415.562.217.96.477 1.382.896.419.42.679.819.896 1.381.164.422.36 1.057.413 2.227.057 1.266.07 1.646.07 4.85s-.015 3.585-.074 4.85c-.061 1.17-.256 1.805-.421 2.227-.224.562-.479.96-.899 1.382-.419.419-.824.679-1.38.896-.42.164-1.065.36-2.235.413-1.274.057-1.649.07-4.859.07-3.211 0-3.586-.015-4.859-.074-1.171-.061-1.816-.256-2.236-.421-.569-.224-.96-.479-1.379-.899-.421-.419-.69-.824-.9-1.38-.165-.42-.359-1.065-.42-2.235-.045-1.26-.061-1.649-.061-4.844 0-3.196.016-3.586.061-4.861.061-1.17.255-1.814.42-2.234.21-.57.479-.96.9-1.381.419-.419.81-.689 1.379-.898.42-.166 1.051-.361 2.221-.421 1.275-.045 1.65-.06 4.859-.06l.045.03zm0 3.678c-3.405 0-6.162 2.76-6.162 6.162 0 3.405 2.76 6.162 6.162 6.162 3.405 0 6.162-2.76 6.162-6.162 0-3.405-2.76-6.162-6.162-6.162zM12 16c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4zm7.846-10.405c0 .795-.646 1.44-1.44 1.44-.795 0-1.44-.646-1.44-1.44 0-.794.646-1.439 1.44-1.439.793-.001 1.44.645 1.44 1.439z' },
+  tiktok:   { special:true },
+  x:        { color:'currentColor', d:'M18.901 1.153h3.68l-8.04 9.19L24 22.846h-7.406l-5.8-7.584-6.638 7.584H.474l8.6-9.83L0 1.154h7.594l5.243 6.932ZM17.61 20.644h2.039L6.486 3.24H4.298Z' },
+  globe:    { stroke:true, d:'<circle cx="12" cy="12" r="8.4"/><ellipse cx="12" cy="12" rx="3.6" ry="8.4"/><path d="M4 12h16"/>' },
+  asterisk: { stroke:true, d:'<path d="M12 4.5v15M5.5 8.25l13 7.5M18.5 8.25l-13 7.5"/>' }
+};
+
+function glyphSVG(k){
+  const b = BRANDS[k] || BRANDS.asterisk;
+  if (b.special){
+    return `<svg viewBox="-2.6 -2.6 29.2 29.2" aria-hidden="true">
+      <path d="${TT_PATH}" transform="translate(-1.5,-1.5)" fill="#25F4EE"/>
+      <path d="${TT_PATH}" transform="translate(1.5,1.5)" fill="#FE2C55"/>
+      <path d="${TT_PATH}" fill="currentColor"/>
+    </svg>`;
+  }
+  if (b.stroke){
+    return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${b.d}</svg>`;
+  }
+  return `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="${b.d}" fill="${b.color}"/></svg>`;
+}
+function guessGlyph(name){
+  const n = (name || '').toLowerCase();
+  if (n.includes('face')) return 'facebook';
+  if (n.includes('youtube') || n.includes('yt')) return 'youtube';
+  if (n.includes('insta')) return 'instagram';
+  if (n.includes('tiktok') || n.includes('tok')) return 'tiktok';
+  if (n.includes('whats') || n.includes('wsp') || n.includes('grupo')) return 'whatsapp';
+  if (n.trim() === 'x' || n.includes('twitter')) return 'x';
+  return 'asterisk';
+}
+const ICON = {
+  arrow:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M9 7h8v8"/></svg>',
+  trash:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M9 7V4.5h6V7M6.5 7l1 12.5h9l1-12.5"/></svg>',
+  sun:  '<circle cx="12" cy="12" r="4.2"/><path d="M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6l1.4 1.4M17 17l1.4 1.4M18.4 5.6L17 7M7 17l-1.4 1.4"/>',
+  moon: '<path d="M20 13.6A8 8 0 1 1 10.4 4 6.4 6.4 0 0 0 20 13.6z"/>'
+};
+
+/* ============ Estado ============ */
+const LS_KEY = 'fh.kit.v1';
+const SEED = {
+  admin: { user:'frases_hishida', pass:null },
+  sys2:  { name:'', url:'' },
+  owner: 'Hishida',
+  tagline: 'Frases para sentir, pensar y compartir. Mías y de quienes pasan por aquí.',
+  updatedAt: null,
+  phrases: [
+    { id:'q1', text:'Lo que callas con el mundo, dilo en una frase.', tag:'Íntimo', by:'admin', author:'' },
+    { id:'q2', text:'No llegas tarde a tu vida: llegas exactamente a ti.', tag:'Tiempo', by:'admin', author:'' },
+    { id:'q3', text:'Hay despedidas que son comienzos con mejor disfraz.', tag:'Adiós', by:'admin', author:'' },
+    { id:'q4', text:'Ser suave también es una forma de ser fuerte.', tag:'Calma', by:'admin', author:'' }
+  ],
+  platforms: [
+    { id:'p1', name:'TikTok',    handle:'@frases_hishida', count:508900, url:'https://tiktok.com/@frases_hishida', label:'seguidores',   glyph:'tiktok' },
+    { id:'p2', name:'Instagram', handle:'@frases_hishida', count:214300, url:'https://instagram.com/frases_hishida', label:'seguidores', glyph:'instagram' },
+    { id:'p3', name:'Facebook',  handle:'Frases Hishida',  count:96120,  url:'https://facebook.com/fraseshishida', label:'seguidores',   glyph:'facebook' },
+    { id:'p4', name:'YouTube',   handle:'@frases_hishida', count:34800,  url:'https://youtube.com/@frases_hishida', label:'suscriptores', glyph:'youtube' },
+    { id:'p5', name:'Grupo de WhatsApp', handle:'Frases Hishida', count:2140, url:'https://chat.whatsapp.com', label:'miembros', glyph:'whatsapp' }
+  ]
+};
+function load(){ try { const r = localStorage.getItem(LS_KEY); if (r) return JSON.parse(r); } catch(e){} return clone(SEED); }
+function persist(){ try { localStorage.setItem(LS_KEY, JSON.stringify(state)); } catch(e){} }
+let state = load();
+if (!state.admin) state.admin = clone(SEED.admin);
+if (!state.sys2)  state.sys2  = clone(SEED.sys2);
+if (state.phrases) state.phrases.forEach(q => { if (!q.by) q.by = 'admin'; });
+let unlocked = false;
+const prevCounts = {};
+
+const drawerEl = $('#drawer'), authOverlay = $('#authOverlay'), qCard = $('#qCard');
+const adminBtn = $('#adminBtn'), adminMenu = $('#adminMenu');
+
+/* ============ Tema ============ */
+function paintIcon(){
+  $('#themeIcon').innerHTML = document.documentElement.dataset.theme === 'dark' ? ICON.sun : ICON.moon;
+}
+ $('#themeBtn').onclick = () => {
+  const next = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
+  document.documentElement.dataset.theme = next;
+  try { localStorage.setItem('fh.theme', next); } catch(e){}
+  paintIcon();
+  toast(next === 'dark' ? 'Tema oscuro' : 'Tema claro');
+};
+paintIcon();
+
+/* ============ Toast ============ */
+let toastTimer;
+function toast(msg){
+  const t = $('#toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2400);
+}
+
+/* ============ Menú de sistemas ============ */
+function openAdminMenu(){
+  adminMenu.classList.add('open');
+  adminBtn.classList.add('active');
+  adminBtn.setAttribute('aria-expanded','true');
+}
+function closeAdminMenu(){
+  adminMenu.classList.remove('open');
+  adminBtn.classList.remove('active');
+  adminBtn.setAttribute('aria-expanded','false');
+}
+adminBtn.onclick = () => adminMenu.classList.contains('open') ? closeAdminMenu() : openAdminMenu();
+document.addEventListener('click', e => {
+  if (!e.target.closest('.admin-wrap')) closeAdminMenu();
+});
+
+/* Sistema 1: este sitio */
+ $('#amThis').onclick = () => {
+  closeAdminMenu();
+  unlocked ? openDrawer() : openAuth();
+};
+/* Sistema 2: configurable */
+ $('#amOther').onclick = () => {
+  closeAdminMenu();
+  const url = (state.sys2 && state.sys2.url || '').trim();
+  if (url){
+    window.open(url, '_blank', 'noopener');
+  } else {
+    toast('Configura el segundo sistema desde tu panel (Fs Hishida).');
+  }
+};
+
+/* ============ Motor de frases ============ */
+const Q_DUR = 6500;
+let qi = 0, qElapsed = 0, qLast = null, qPaused = false;
+
+function renderQuote(){
+  const list = state.phrases, len = list.length;
+  const wrap = $('#qTextWrap');
+  if (!len){
+    $('#qTagChip').textContent = 'Sin frases';
+    $('#qIdx').textContent = '— / —';
+    wrap.innerHTML = '<p class="q-text">Aún no hay frases publicadas.</p>';
+    return;
+  }
+  if (qi >= len) qi = 0;
+  const q = list[qi];
+  $('#qTagChip').textContent = q.by === 'community'
+    ? 'Comunidad' + (q.author ? ' · ' + q.author : '')
+    : (q.tag || 'Frase');
+  $('#qIdx').textContent = String(qi + 1).padStart(2,'0') + ' / ' + String(len).padStart(2,'0');
+  wrap.innerHTML = '<p class="q-text">' + esc(q.text) + '</p>';
+  wrap.classList.remove('q-anim'); void wrap.offsetWidth; wrap.classList.add('q-anim');
+}
+function navQuote(d){
+  const len = state.phrases.length;
+  if (!len) return;
+  qi = ((qi + d) % len + len) % len;
+  qElapsed = 0;
+  renderQuote();
+}
+function modalsBusy(){
+  return drawerEl.classList.contains('open') || authOverlay.classList.contains('open');
+}
+function qLoop(t){
+  if (qLast == null) qLast = t;
+  let dt = t - qLast; qLast = t;
+  if (dt < 0 || dt > 200) dt = 0;
+  const len = state.phrases.length;
+  const paused = qPaused || document.hidden || modalsBusy() || len < 2 || reduced;
+  if (!paused){
+    qElapsed += dt;
+    if (qElapsed >= Q_DUR){ qElapsed = 0; qi = (qi + 1) % len; renderQuote(); }
+  }
+  const fill = $('#qProgFill');
+  if (fill) fill.style.width = reduced ? '0%' : Math.min(100, qElapsed / Q_DUR * 100) + '%';
+  requestAnimationFrame(qLoop);
+}
+ $('#qPrev').onclick = () => navQuote(-1);
+ $('#qNext').onclick = () => navQuote(1);
+ $('#qCopy').onclick = () => {
+  const q = state.phrases[qi];
+  if (q) copyText('“' + q.text + '”');
+};
+qCard.addEventListener('pointerenter', () => qPaused = true);
+qCard.addEventListener('pointerleave', () => qPaused = false);
+qCard.addEventListener('focusin',  () => qPaused = true);
+qCard.addEventListener('focusout', () => qPaused = false);
+
+/* ============ Frases de la comunidad ============ */
+ $('#qForm').addEventListener('submit', e => {
+  e.preventDefault();
+  const text = $('#qFormPhrase').value.trim();
+  if (!text){ toast('Escribe tu frase antes de publicar.'); $('#qFormPhrase').focus(); return; }
+  const author = $('#qFormName').value.trim().slice(0, 24);
+  state.phrases.push({ id: uid(), text: text.slice(0,180), tag:'Comunidad', by:'community', author });
+  state.updatedAt = Date.now();
+  persist();
+  qi = state.phrases.length - 1;
+  qElapsed = 0;
+  render();
+  $('#qFormPhrase').value = '';
+  $('#qFormName').value = '';
+  toast('Frase publicada. ¡Gracias por compartir!');
+  qCard.scrollIntoView({ behavior:'smooth', block:'nearest' });
+});
+
+/* ============ Contadores ============ */
+function runCounters(){
+  document.querySelectorAll('.count-anim').forEach(el => {
+    const key = el.dataset.count;
+    const target = +el.dataset.target || 0;
+    const from = prevCounts[key] ?? 0;
+    prevCounts[key] = target;
+    const show = v => target >= 1000 ? fmtCompact(v) : fmtInt(v);
+    if (reduced){ el.textContent = show(target); return; }
+    const dur = 1200;
+    const t0 = performance.now();
+    cancelAnimationFrame(el._raf);
+    const step = t => {
+      const p = Math.min(1, (t - t0) / dur);
+      const e = 1 - Math.pow(1 - p, 4);
+      el.textContent = show(from + (target - from) * e);
+      if (p < 1) el._raf = requestAnimationFrame(step);
+    };
+    el._raf = requestAnimationFrame(step);
+  });
+}
+
+/* ============ Aparición al hacer scroll ============ */
+function observeReveals(){
+  const io = new IntersectionObserver(entries => {
+    entries.forEach(en => { if (en.isIntersecting){ en.target.classList.add('in'); io.unobserve(en.target); } });
+  }, { threshold:.08 });
+  document.querySelectorAll('.rv:not(.in)').forEach(el => io.observe(el));
+}
+
+/* ============ Tarjetas compactas ============ */
+function cardHTML(p, i){
+  const g = glyphSVG(p.glyph || guessGlyph(p.name));
+  const url = (p.url || '').trim();
+  return `<a class="pcard rv" style="--d:${Math.min(i * 50, 250)}ms"
+    href="${url ? esc(url) : '#'}" ${url ? 'target="_blank" rel="noopener"' : ''} data-nolink="${url ? 0 : 1}">
+    <span class="pc-top">
+      <span class="pc-glyph">${g}</span>
+      <span class="pc-arrow">${ICON.arrow}</span>
+    </span>
+    <span class="pc-name">${esc(p.name)}</span>
+    <span class="pc-handle" data-handle="${esc(p.handle)}" title="Copiar usuario">${esc(p.handle)}</span>
+    <span class="pc-foot">
+      <b class="count-anim" data-count="${esc(p.id)}" data-target="${+p.count || 0}">0</b>
+      <span class="pc-lab">${esc(p.label || 'seguidores')}</span>
+    </span>
+  </a>`;
+}
+
+/* ============ Render general ============ */
+function render(){
+  const total = state.platforms.reduce((a, p) => a + (+p.count || 0), 0);
+  const now = new Date();
+
+  document.title = (state.owner ? state.owner + ' — ' : '') + 'Frases';
+  $('#heroName').textContent    = state.owner || 'Hishida';
+  $('#heroTagline').textContent = state.tagline || '';
+  $('#footOwner').textContent   = state.owner || '';
+  $('#footYear').textContent    = now.getFullYear();
+  $('#updChip').textContent = state.updatedAt
+    ? 'Actualizado el ' + new Date(state.updatedAt).toLocaleDateString('es-ES', { day:'2-digit', month:'2-digit', year:'numeric' })
+    : 'En línea';
+
+  $('#statPlats').textContent  = state.platforms.length;
+  $('#statQuotes').textContent = state.phrases.length;
+  const totalEl = document.querySelector('[data-count="total"]');
+  if (totalEl) totalEl.dataset.target = total;
+
+  const sorted = [...state.platforms].sort((a, b) => (+b.count || 0) - (+a.count || 0));
+  $('#pCount').textContent = String(sorted.length).padStart(2,'0') + (sorted.length === 1 ? ' cuenta' : ' cuentas');
+  if (!sorted.length){
+    $('#pgrid').innerHTML = `<div class="pcard empty-card rv">
+      <span class="pc-name">Sin plataformas todavía</span>
+      <span class="pc-lab">Añádelas desde el menú Fs Hishida.</span></div>`;
+  } else {
+    $('#pgrid').innerHTML = sorted.map(cardHTML).join('');
+  }
+
+  /* Etiquetas del segundo sistema en el menú */
+  const s2name = (state.sys2 && state.sys2.name || '').trim();
+  const s2url  = (state.sys2 && state.sys2.url  || '').trim();
+  $('#amOtherName').textContent = s2name || 'Segundo sistema';
+  $('#amOtherHint').textContent = s2url ? 'Abrir enlace' : 'Sin configurar';
+
+  renderQuote();
+  observeReveals();
+  requestAnimationFrame(runCounters);
+}
+
+/* ============ Acceso del autor ============ */
+let authMode = 'enter';
+function openAuth(){
+  closeAdminMenu();
+  authMode = state.admin.pass ? 'enter' : 'create';
+  $('#authTitle').textContent = authMode === 'create' ? 'Crea tu acceso único' : 'Acceso restringido';
+  $('#authSub').textContent = authMode === 'create'
+    ? 'Primera vez: define el usuario y la contraseña que solo tú conocerás. Con ellos editarás todo el sitio.'
+    : 'Introduce tu usuario y contraseña para gestionar los datos públicos.';
+  $('#authUser').value = authMode === 'create' ? (state.admin.user || 'frases_hishida') : '';
+  $('#authPass').value = '';
+  $('#authConfirm').value = '';
+  $('#authConfirmWrap').hidden = authMode !== 'create';
+  $('#authSubmit').textContent = authMode === 'create' ? 'Crear y entrar' : 'Entrar';
+  $('#authReset').hidden = authMode === 'create';
+  $('#authError').hidden = true;
+  authOverlay.classList.add('open');
+  setTimeout(() => $('#authUser').focus(), 300);
+}
+function closeAuth(){ authOverlay.classList.remove('open'); }
+function authErr(msg){ const e = $('#authError'); e.textContent = msg; e.hidden = false; }
+
+ $('#authForm').addEventListener('submit', e => {
+  e.preventDefault();
+  const u  = $('#authUser').value.trim();
+  const p1 = $('#authPass').value, p2 = $('#authConfirm').value;
+  if (authMode === 'create'){
+    if (u.length < 3)  return authErr('El usuario debe tener al menos 3 caracteres.');
+    if (p1.length < 4) return authErr('La contraseña debe tener al menos 4 caracteres.');
+    if (p1 !== p2)     return authErr('Las contraseñas no coinciden.');
+    state.admin = { user: u, pass: hashStr(p1) };
+    persist();
+    unlocked = true;
+    closeAuth();
+    openDrawer();
+    toast('Acceso creado. Sesión iniciada.');
+  } else {
+    if (u === state.admin.user && hashStr(p1) === state.admin.pass){
+      unlocked = true;
+      closeAuth();
+      openDrawer();
+      toast('Bienvenido, ' + state.admin.user + '.');
+    } else {
+      authErr('Usuario o contraseña incorrectos.');
+    }
+  }
+});
+ $('#authToggle').onclick = () => {
+  const i = $('#authPass');
+  const show = i.type === 'password';
+  i.type = show ? 'text' : 'password';
+  $('#authToggle').textContent = show ? 'Ocultar' : 'Mostrar';
+};
+let resetArmed = false, resetTimer;
+ $('#authReset').onclick = () => {
+  if (!resetArmed){
+    resetArmed = true;
+    $('#authReset').textContent = 'Pulsa otra vez para borrar TODO';
+    resetTimer = setTimeout(() => {
+      resetArmed = false;
+      $('#authReset').textContent = '¿Olvidaste tus datos? Restablecer todo';
+    }, 3500);
+    return;
+  }
+  clearTimeout(resetTimer);
+  resetArmed = false;
+  try { localStorage.removeItem(LS_KEY); } catch(e){}
+  state = clone(SEED);
+  unlocked = true;
+  qi = 0; qElapsed = 0;
+  closeAuth();
+  render();
+  openDrawer();
+  toast('Sitio restablecido a los datos de ejemplo.');
+};
+ $('#authClose').onclick = closeAuth;
+authOverlay.addEventListener('click', e => { if (e.target === e.currentTarget) closeAuth(); });
+
+/* ============ Panel del autor ============ */
+let draft = null;
+function openDrawer(){
+  if (!unlocked){ openAuth(); return; }
+  draft = clone(state);
+  $('#edOwner').value = draft.owner || '';
+  $('#edTagline').value = draft.tagline || '';
+  $('#edSys2Name').value = (draft.sys2 && draft.sys2.name) || '';
+  $('#edSys2Url').value  = (draft.sys2 && draft.sys2.url)  || '';
+  $('#edAdminUser').value = draft.admin.user || '';
+  $('#edNewPass').value = '';
+  $('#edNewPass2').value = '';
+  renderEdQuotes();
+  renderEdPlats();
+  drawerEl.classList.add('open');
+  $('#drawerOverlay').classList.add('open');
+}
+function closeDrawer(){
+  drawerEl.classList.remove('open');
+  $('#drawerOverlay').classList.remove('open');
+}
+
+function renderEdQuotes(){
+  const wrap = $('#edQuotes');
+  $('#edQCount').textContent = '(' + draft.phrases.length + ')';
+  if (!draft.phrases.length){
+    wrap.innerHTML = '<p class="ed-empty">Sin frases. Añade la primera con “+ añadir”.</p>';
+    return;
+  }
+  wrap.innerHTML = draft.phrases.map(q => {
+    const who = q.by === 'community'
+      ? 'Comunidad' + (q.author ? ' · ' + esc(q.author) : '')
+      : 'Tuya';
+    return `<div class="ed-item" data-id="${esc(q.id)}">
+      <div class="ed-head">
+        <span class="ed-badge q">“</span>
+        <input class="ed-name" data-field="text" value="${esc(q.text)}" placeholder="Escribe tu frase…">
+        <span class="ed-who">${who}</span>
+        <button type="button" class="ed-del" aria-label="Eliminar">${ICON.trash}</button>
+      </div>
+      <div class="ed-grid">
+        <label class="field wide"><span>Tema (opcional)</span><input class="input" data-field="tag" value="${esc(q.tag || '')}" placeholder="Amor, calma, superación…"></label>
+      </div>
+    </div>`;
+  }).join('');
+}
+function renderEdPlats(){
+  const wrap = $('#edPlats');
+  $('#edPCount').textContent = '(' + draft.platforms.length + ')';
+  if (!draft.platforms.length){
+    wrap.innerHTML = '<p class="ed-empty">Sin plataformas. Añade la primera.</p>';
+    return;
+  }
+  wrap.innerHTML = draft.platforms.map(p => {
+    const g = p.glyph || guessGlyph(p.name);
+    return `<div class="ed-item" data-id="${esc(p.id)}">
+      <div class="ed-head">
+        <span class="ed-badge">${glyphSVG(g)}</span>
+        <input class="ed-name" data-field="name" value="${esc(p.name)}" placeholder="Nombre de la plataforma">
+        <button type="button" class="ed-del" aria-label="Eliminar">${ICON.trash}</button>
+      </div>
+      <div class="ed-grid">
+        <label class="field"><span>Usuario</span><input class="input" data-field="handle" value="${esc(p.handle)}" placeholder="@usuario"></label>
+        <label class="field"><span>Cantidad</span><input class="input" data-field="count" type="number" min="0" inputmode="numeric" value="${+p.count || 0}"></label>
+        <label class="field"><span>Etiqueta</span><input class="input" data-field="label" value="${esc(p.label)}" placeholder="seguidores"></label>
+        <label class="field"><span>Enlace</span><input class="input" data-field="url" value="${esc(p.url)}" placeholder="https://…"></label>
+      </div>
+      <div class="gprow">${Object.keys(BRANDS).map(k =>
+        `<button type="button" class="gp ${k === g ? 'sel' : ''}" data-glyph="${k}" aria-label="${k}">${glyphSVG(k)}</button>`
+      ).join('')}</div>
+    </div>`;
+  }).join('');
+}
+
+drawerEl.addEventListener('input', e => {
+  const f = e.target.dataset.field;
+  if (!f) return;
+  const item = e.target.closest('.ed-item');
+  if (!item) return;
+  if (item.closest('#edQuotes')){
+    const q = draft.phrases.find(x => x.id === item.dataset.id);
+    if (q) q[f] = e.target.value;
+  } else {
+    const p = draft.platforms.find(x => x.id === item.dataset.id);
+    if (!p) return;
+    if (f === 'count') p.count = Math.max(0, parseInt(e.target.value, 10) || 0);
+    else p[f] = e.target.value;
+    if (f === 'name' && p._auto){
+      p.glyph = guessGlyph(e.target.value);
+      item.querySelector('.ed-badge').innerHTML = glyphSVG(p.glyph);
+      item.querySelectorAll('.gp').forEach(b => b.classList.toggle('sel', b.dataset.glyph === p.glyph));
+    }
+  }
+});
+drawerEl.addEventListener('click', e => {
+  const item = e.target.closest('.ed-item');
+  if (!item) return;
+  const gp = e.target.closest('.gp');
+  if (gp){
+    const p = draft.platforms.find(x => x.id === item.dataset.id);
+    if (!p) return;
+    p.glyph = gp.dataset.glyph;
+    p._auto = false;
+    item.querySelector('.ed-badge').innerHTML = glyphSVG(p.glyph);
+    item.querySelectorAll('.gp').forEach(b => b.classList.toggle('sel', b === gp));
+    return;
+  }
+  const del = e.target.closest('.ed-del');
+  if (del){
+    if (del.classList.contains('armed')){
+      if (item.closest('#edQuotes')) draft.phrases = draft.phrases.filter(x => x.id !== item.dataset.id);
+      else draft.platforms = draft.platforms.filter(x => x.id !== item.dataset.id);
+      item.closest('#edQuotes') ? renderEdQuotes() : renderEdPlats();
+    } else {
+      del.classList.add('armed');
+      del.textContent = '¿Seguro?';
+      setTimeout(() => {
+        if (document.body.contains(del)){
+          del.classList.remove('armed');
+          del.innerHTML = ICON.trash;
+        }
+      }, 2600);
+    }
+  }
+});
+ $('#edAddQ').onclick = () => {
+  draft.phrases.push({ id: uid(), text:'', tag:'', by:'admin', author:'' });
+  renderEdQuotes();
+  const last = $('#edQuotes').lastElementChild;
+  if (last){ last.scrollIntoView({ behavior:'smooth', block:'center' }); last.querySelector('.ed-name')?.focus(); }
+};
+ $('#edAddP').onclick = () => {
+  draft.platforms.push({ id: uid(), name:'', handle:'', count:0, url:'', label:'', glyph:'asterisk', _auto:true });
+  renderEdPlats();
+  const last = $('#edPlats').lastElementChild;
+  if (last){ last.scrollIntoView({ behavior:'smooth', block:'center' }); last.querySelector('.ed-name')?.focus(); }
+};
+ $('#edSave').onclick = () => {
+  document.querySelectorAll('.ed-name.err').forEach(el => el.classList.remove('err'));
+  if (!$('#edOwner').value.trim()){ toast('El nombre público no puede quedar vacío.'); $('#edOwner').focus(); return; }
+  draft.phrases = draft.phrases.filter(q => q.text.trim());
+  for (const q of draft.phrases){
+    if (!q.text.trim()){
+      const el = document.querySelector(`#edQuotes .ed-item[data-id="${q.id}"] .ed-name`);
+      if (el){ el.classList.add('err'); el.scrollIntoView({ block:'center', behavior:'smooth' }); }
+      toast('Hay una frase vacía.');
+      return;
+    }
+  }
+  draft.platforms = draft.platforms.filter(p =>
+    !(!p.name.trim() && !p.handle.trim() && !(+p.count) && !p.url.trim()));
+  for (const p of draft.platforms){
+    if (!p.name.trim()){
+      const el = document.querySelector(`#edPlats .ed-item[data-id="${p.id}"] .ed-name`);
+      if (el){ el.classList.add('err'); el.scrollIntoView({ block:'center', behavior:'smooth' }); }
+      toast('Hay una plataforma sin nombre.');
+      return;
+    }
+  }
+  draft.sys2 = {
+    name: $('#edSys2Name').value.trim(),
+    url:  $('#edSys2Url').value.trim()
+  };
+  const nu = $('#edAdminUser').value.trim();
+  if (nu){
+    if (nu.length < 3){ toast('El usuario debe tener al menos 3 caracteres.'); return; }
+    draft.admin.user = nu;
+  }
+  const n1 = $('#edNewPass').value, n2 = $('#edNewPass2').value;
+  if (n1 || n2){
+    if (n1.length < 4){ toast('La nueva contraseña debe tener al menos 4 caracteres.'); return; }
+    if (n1 !== n2)    { toast('Las contraseñas nuevas no coinciden.'); return; }
+    draft.admin.pass = hashStr(n1);
+  }
+  draft.owner = $('#edOwner').value.trim();
+  draft.tagline = $('#edTagline').value.trim();
+  draft.updatedAt = Date.now();
+  state = draft;
+  persist();
+  qi = 0; qElapsed = 0;
+  render();
+  closeDrawer();
+  toast('Cambios guardados.');
+};
+ $('#edDiscard').onclick = closeDrawer;
+ $('#drawerClose').onclick = closeDrawer;
+ $('#lockBtn').onclick = () => { unlocked = false; closeDrawer(); toast('Sesión cerrada.'); };
+ $('#drawerOverlay').addEventListener('click', closeDrawer);
+
+/* ============ Atajos ============ */
+addEventListener('keydown', e => {
+  if (e.altKey && e.shiftKey && (e.key === 'E' || e.key === 'e')){ e.preventDefault(); unlocked ? openDrawer() : openAuth(); }
+  if (e.key === 'Enter' && e.target.dataset && e.target.dataset.handle){ copyText(e.target.dataset.handle); }
+  if (e.key === 'Escape'){
+    if (adminMenu.classList.contains('open')) closeAdminMenu();
+    else if (authOverlay.classList.contains('open')) closeAuth();
+    else if (drawerEl.classList.contains('open')) closeDrawer();
+  }
+});
+
+/* ============ Copiar usuario / enlace faltante ============ */
+document.addEventListener('click', e => {
+  const h = e.target.closest('[data-handle]');
+  if (h){ e.preventDefault(); e.stopPropagation(); copyText(h.dataset.handle); return; }
+  const nl = e.target.closest('[data-nolink="1"]');
+  if (nl){ e.preventDefault(); toast('Añade un enlace desde el menú Fs Hishida.'); }
+});
+
+/* ============ Inicio ============ */
+render();
+requestAnimationFrame(qLoop);
+</script>
+</body>
+</html>
