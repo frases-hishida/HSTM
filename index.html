@@ -93,12 +93,10 @@
   .am-ico svg{width:14px;height:14px}
   .am-text{display:flex;flex-direction:column;gap:1px;min-width:0}
   .am-text b{font-size:13.5px;font-weight:700;letter-spacing:-.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .am-text small{font-family:'Space Grotesk';font-size:9.5px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--mut)}
 
   .nav-links{display:flex;gap:22px;margin-left:auto}
   .nav-links a{font-size:13px;font-weight:600;color:var(--mut);text-decoration:none;transition:color .25s}
   .nav-links a:hover{color:var(--fg)}
-  /* Botones de acción a la derecha: ojo (control) + tema */
   .nav-actions{display:flex;align-items:center;gap:8px;margin-left:auto;flex:none}
   .icon-btn{
     width:36px;height:36px;border-radius:50%;border:1px solid var(--line);flex:none;
@@ -204,6 +202,7 @@
     transition:border-color .2s,background-color .2s;
   }
   .input:focus{border-color:var(--hair)}
+  .ta{min-height:64px;resize:vertical}
 
   /* ---------- Estadísticas ---------- */
   #stats{margin-top:12px}
@@ -223,7 +222,7 @@
   .pcard{
     position:relative;display:flex;flex-direction:column;gap:8px;
     background:var(--card);border:1px solid var(--line);border-radius:18px;
-    padding:14px 14px 15px;text-decoration:none;
+    padding:14px 14px 15px;text-decoration:none;cursor:pointer;
     transition:background-color .3s,border-color .3s,transform .3s,box-shadow .3s;
   }
   .pcard:hover,.pcard:active{
@@ -271,7 +270,7 @@
   }
   :root[data-theme="light"] .overlay{background:rgba(16,16,18,.35)}
   .overlay.open{opacity:1;pointer-events:auto}
-  #authOverlay{z-index:130;display:flex;align-items:center;justify-content:center;padding:16px}
+  #authOverlay,#platOverlay{z-index:130;display:flex;align-items:center;justify-content:center;padding:16px}
   #drawerOverlay{z-index:110}
   .modal{
     width:min(400px,100%);background:var(--card);border:1px solid var(--line);border-radius:22px;
@@ -279,6 +278,61 @@
     transition:transform .35s cubic-bezier(.22,.8,.24,1),background-color .5s;
   }
   #authOverlay.open .modal{transform:none}
+
+  /* ---------- Ventana de plataforma (fondo editable + descripción) ---------- */
+  .pmodal{
+    position:relative;width:min(440px,100%);border-radius:24px;overflow:hidden;
+    border:1px solid var(--line);box-shadow:var(--shadow);
+    min-height:340px;display:flex;flex-direction:column;justify-content:flex-end;
+    transform:translateY(14px);transition:transform .35s cubic-bezier(.22,.8,.24,1);
+  }
+  #platOverlay.open .pmodal{transform:none}
+  .pm-bg{position:absolute;inset:0;background:linear-gradient(135deg,#1a1a1e,#0c0c0e)}
+  .pm-scrim{
+    position:absolute;inset:0;
+    background:linear-gradient(to top, rgba(0,0,0,.88) 0%, rgba(0,0,0,.55) 45%, rgba(0,0,0,.25) 100%);
+  }
+  .pm-close{
+    position:absolute;top:12px;right:12px;z-index:3;
+    width:34px;height:34px;border-radius:50%;border:1px solid rgba(255,255,255,.3);
+    background:rgba(0,0,0,.35);color:#fff;display:grid;place-items:center;
+    backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
+    transition:background .25s,border-color .25s;
+  }
+  .pm-close:hover,.pm-close:active{background:rgba(0,0,0,.6);border-color:rgba(255,255,255,.6)}
+  .pm-close svg{width:14px;height:14px}
+  .pm-body{position:relative;z-index:2;padding:24px;display:flex;flex-direction:column;gap:12px;color:#fff}
+  .pm-icon{
+    width:48px;height:48px;border-radius:14px;border:1px solid rgba(255,255,255,.3);
+    background:rgba(255,255,255,.1);display:grid;place-items:center;
+    backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+  }
+  .pm-icon svg{width:24px;height:24px}
+  .pm-name{font-weight:700;font-size:24px;letter-spacing:-.02em;line-height:1.15}
+  .pm-handle{
+    width:max-content;max-width:100%;border:1px solid rgba(255,255,255,.35);border-radius:999px;
+    padding:4px 12px;font-family:'Space Grotesk';font-size:10px;font-weight:600;
+    letter-spacing:.08em;background:rgba(255,255,255,.08);
+  }
+  .pm-desc{
+    font-size:14.5px;line-height:1.6;color:rgba(255,255,255,.85);
+    max-width:44ch;overflow-wrap:break-word;
+  }
+  .pm-actions{display:flex;gap:10px;margin-top:6px;flex-wrap:wrap}
+  .pm-visit{
+    display:inline-flex;align-items:center;gap:8px;border-radius:999px;
+    padding:11px 22px;font-weight:700;font-size:13px;
+    background:#fff;color:#0a0a0b;border:1px solid #fff;
+    transition:background .25s,color .25s,transform .25s;
+    text-decoration:none;
+  }
+  .pm-visit:hover,.pm-visit:active{background:transparent;color:#fff}
+  .pm-visit svg{width:14px;height:14px}
+  .pm-nolink{
+    display:inline-block;font-family:'Space Grotesk';font-size:10.5px;font-weight:600;
+    letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.6);
+  }
+
   .modal-head{display:flex;justify-content:space-between;align-items:center}
   .modal h3{font-weight:700;font-size:21px;letter-spacing:-.02em;margin-top:14px}
   .modal-sub{font-size:13.5px;line-height:1.6;color:var(--mut);margin-top:6px}
@@ -424,17 +478,11 @@
       </button>
       <div class="admin-menu" id="adminMenu" role="menu">
         <span class="am-label">Sistemas</span>
-        <button class="am-item" id="amThis" role="menuitem">
-          <span class="am-ico">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4.5" width="18" height="12" rx="2"/><path d="M9 20h6M12 16.5V20"/></svg>
-          </span>
-          <span class="am-text"><b>Sitio web 1</b></span>
-        </button>
         <button class="am-item" id="amOther" role="menuitem">
           <span class="am-ico">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4h6v6M20 4l-9 9"/><path d="M19 13.5V18a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h4.5"/></svg>
           </span>
-          <span class="am-text"><b>Sitio web 2</b><small>Abrir enlace</small></span>
+          <span class="am-text"><b>Sitio web 2</b></span>
         </button>
       </div>
     </div>
@@ -445,7 +493,6 @@
     </div>
 
     <div class="nav-actions">
-      <!-- Ojo: control único del sitio (crear cuenta la 1.ª vez, luego entrar) -->
       <button class="icon-btn" id="eyeBtn" aria-label="Control del sitio" title="Control del sitio">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-6.5 10-6.5S22 12 22 12s-3.5 6.5-10 6.5S2 12 2 12z"/><circle cx="12" cy="12" r="2.8"/></svg>
       </button>
@@ -522,10 +569,28 @@
 
   <footer>
     <span class="mini">© <span id="footYear"></span> · <span id="footOwner"></span></span>
-    <span class="mini">frases_hishida · v9</span>
+    <span class="mini">frases_hishida · v10</span>
   </footer>
 
 </main>
+
+<!-- ===== Ventana de plataforma: fondo editable + descripción ===== -->
+<div class="overlay" id="platOverlay">
+  <div class="pmodal" role="dialog" aria-modal="true" aria-labelledby="pmName">
+    <div class="pm-bg" id="pmBg"></div>
+    <div class="pm-scrim"></div>
+    <button class="pm-close" id="pmClose" aria-label="Cerrar">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+    </button>
+    <div class="pm-body">
+      <span class="pm-icon" id="pmIcon"></span>
+      <h3 class="pm-name" id="pmName">Plataforma</h3>
+      <span class="pm-handle" id="pmHandle"></span>
+      <p class="pm-desc" id="pmDesc"></p>
+      <div class="pm-actions" id="pmActions"></div>
+    </div>
+  </div>
+</div>
 
 <!-- ===== Control del sitio (ojo) ===== -->
 <div class="overlay" id="authOverlay">
@@ -721,7 +786,7 @@ var ICON = {
 };
 
 /* ============ Estado — TUS DATOS REALES ============ */
-var LS_KEY = 'fh.kit.v7'; /* se conserva: tu cuenta y datos no se pierden */
+var LS_KEY = 'fh.kit.v10'; /* v10: agrega bg + desc por plataforma */
 var SEED = {
   admin: { user:'frases_hishida', pass:null },
   sys2:  { name:'Sitio web 2', url:'https://frases-hishida.github.io/fsapp/' },
@@ -735,11 +800,11 @@ var SEED = {
     { id:'q4', text:'Ser suave también es una forma de ser fuerte.', tag:'Calma', by:'admin', author:'' }
   ],
   platforms: [
-    { id:'p1', name:'TikTok',    handle:'@frases_hishida',          count:0, url:'https://www.tiktok.com/@frases_hishida',           label:'seguidores',   glyph:'tiktok' },
-    { id:'p2', name:'Instagram', handle:'@fraseshishida',           count:0, url:'https://www.instagram.com/fraseshishida/',         label:'seguidores',   glyph:'instagram' },
-    { id:'p3', name:'Facebook',  handle:'Hishida099',               count:0, url:'https://www.facebook.com/Hishida099',              label:'seguidores',   glyph:'facebook' },
-    { id:'p4', name:'YouTube',   handle:'@Frases_hishida',          count:0, url:'https://www.youtube.com/@Frases_hishida',          label:'suscriptores', glyph:'youtube' },
-    { id:'p5', name:'Grupo de WhatsApp', handle:'Comunidad Frases y más..', count:0, url:'https://chat.whatsapp.com/CzVStek9Td92bgusVeX8xk', label:'miembros', glyph:'whatsapp' }
+    { id:'p1', name:'TikTok',    handle:'@frases_hishida',          count:0, url:'https://www.tiktok.com/@frases_hishida',           label:'seguidores',   glyph:'tiktok',    bg:'', desc:'' },
+    { id:'p2', name:'Instagram', handle:'@fraseshishida',           count:0, url:'https://www.instagram.com/fraseshishida/',         label:'seguidores',   glyph:'instagram', bg:'', desc:'' },
+    { id:'p3', name:'Facebook',  handle:'Hishida099',               count:0, url:'https://www.facebook.com/Hishida099',              label:'seguidores',   glyph:'facebook',  bg:'', desc:'' },
+    { id:'p4', name:'YouTube',   handle:'@Frases_hishida',          count:0, url:'https://www.youtube.com/@Frases_hishida',          label:'suscriptores', glyph:'youtube',   bg:'', desc:'' },
+    { id:'p5', name:'Grupo de WhatsApp', handle:'Comunidad Frases y más..', count:0, url:'https://chat.whatsapp.com/CzVStek9Td92bgusVeX8xk', label:'miembros', glyph:'whatsapp', bg:'', desc:'' }
   ]
 };
 
@@ -761,7 +826,14 @@ function load(){
           out.sys2.url = typeof saved.sys2.url === 'string' ? saved.sys2.url : out.sys2.url;
         }
         if (isArr(saved.phrases) && saved.phrases.length) out.phrases = saved.phrases;
-        if (isArr(saved.platforms) && saved.platforms.length) out.platforms = saved.platforms;
+        if (isArr(saved.platforms) && saved.platforms.length){
+          out.platforms = saved.platforms;
+          /* Completa bg/desc si faltan en datos viejos */
+          for (var k = 0; k < out.platforms.length; k++){
+            if (typeof out.platforms[k].bg !== 'string') out.platforms[k].bg = '';
+            if (typeof out.platforms[k].desc !== 'string') out.platforms[k].desc = '';
+          }
+        }
         if (saved.updatedAt) out.updatedAt = saved.updatedAt;
       }
     }
@@ -779,10 +851,13 @@ var unlocked = false;
 var prevCounts = {};
 
 var drawerEl = $('#drawer'), authOverlay = $('#authOverlay'), qCard = $('#qCard');
+var platOverlay = $('#platOverlay');
 var adminBtn = $('#adminBtn'), adminMenu = $('#adminMenu');
 
 function syncScrollLock(){
-  var open = drawerEl.classList.contains('open') || authOverlay.classList.contains('open');
+  var open = drawerEl.classList.contains('open')
+    || authOverlay.classList.contains('open')
+    || platOverlay.classList.contains('open');
   document.body.style.overflow = open ? 'hidden' : '';
 }
 
@@ -833,26 +908,66 @@ adminBtn.onclick = function(){
 document.addEventListener('click', function(e){
   if (!e.target.closest('.admin-wrap')) closeAdminMenu();
 });
-/* Sitio web 1: este sitio — lleva al inicio */
- $('#amThis').onclick = function(){
-  closeAdminMenu();
-  var hero = document.getElementById('inicio');
-  if (hero) hero.scrollIntoView({ behavior:'smooth', block:'start' });
-};
-/* Sitio web 2: abre el enlace configurado */
  $('#amOther').onclick = function(){
   closeAdminMenu();
   var url = ((state.sys2 && state.sys2.url) || '').trim();
   if (url){
     openExternal(url);
   } else {
-    toast('Configura el enlace de Sitio web 2 desde tu panel (icono de ojo).');
+    toast('Configura el enlace de Sitio web 2 desde el icono de ojo.');
   }
 };
-/* Ojo: control único del sitio (crear cuenta la 1.ª vez / entrar después) */
  $('#eyeBtn').onclick = function(){
   if (unlocked) openDrawer(); else openAuth();
 };
+
+/* ============ Ventana de plataforma ============ */
+function openPlatModal(p){
+  var g = glyphSVG(p.glyph || guessGlyph(p.name));
+  $('#pmIcon').innerHTML = g;
+  $('#pmName').textContent = p.name || 'Plataforma';
+  $('#pmHandle').textContent = p.handle || '';
+
+  /* Descripción: si no hay, una por defecto según la plataforma */
+  var desc = (p.desc || '').trim();
+  if (!desc){
+    desc = 'Sígueme en ' + (p.name || 'esta plataforma') + ' para no perderte ninguna frase.';
+  }
+  $('#pmDesc').textContent = desc;
+
+  /* Fondo: URL de imagen, color, o degradado por defecto */
+  var bg = (p.bg || '').trim();
+  var bgEl = $('#pmBg');
+  if (bg){
+    if (/^https?:\/\//i.test(bg) || /\.(jpg|jpeg|png|webp|gif|svg)(\?|$)/i.test(bg)){
+      bgEl.style.background = '#000 url("' + bg.replace(/"/g, '%22') + '") center/cover no-repeat';
+    } else {
+      bgEl.style.background = bg; /* color hex, nombre, o gradiente CSS */
+    }
+  } else {
+    bgEl.style.background = 'linear-gradient(135deg,#1a1a1e,#0c0c0e)';
+  }
+
+  /* Acción: botón visitar si hay enlace */
+  var url = (p.url || '').trim();
+  var actions = $('#pmActions');
+  if (url){
+    actions.innerHTML = '<a class="pm-visit" href="' + esc(url) + '" target="_blank" rel="noopener">Visitar ' + ICON.arrow + '</a>';
+  } else {
+    actions.innerHTML = '<span class="pm-nolink">Enlace por configurar</span>';
+  }
+
+  platOverlay.classList.add('open');
+  syncScrollLock();
+}
+function closePlatModal(){
+  platOverlay.classList.remove('open');
+  syncScrollLock();
+}
+ $('#pmClose').onclick = closePlatModal;
+platOverlay.addEventListener('click', function(e){
+  if (e.target === e.currentTarget) closePlatModal();
+});
 
 /* ============ Motor de frases ============ */
 var Q_DUR = 6500;
@@ -886,7 +1001,9 @@ function navQuote(d){
   renderQuote();
 }
 function modalsBusy(){
-  return drawerEl.classList.contains('open') || authOverlay.classList.contains('open');
+  return drawerEl.classList.contains('open')
+    || authOverlay.classList.contains('open')
+    || platOverlay.classList.contains('open');
 }
 function qLoop(t){
   if (qLast == null) qLast = t;
@@ -957,14 +1074,11 @@ function runCounters(){
   });
 }
 
-/* ============ Tarjetas de plataformas ============ */
+/* ============ Tarjetas de plataformas (abren la ventana) ============ */
 function cardHTML(p, i){
   var g = glyphSVG(p.glyph || guessGlyph(p.name));
-  var url = (p.url || '').trim();
   return '<a class="pcard rv" style="--d:' + Math.min(i * 50, 250) + 'ms"'
-    + ' href="' + (url ? esc(url) : '#') + '"'
-    + (url ? ' target="_blank" rel="noopener"' : '')
-    + ' data-nolink="' + (url ? 0 : 1) + '">'
+    + ' href="#" data-plat="' + esc(p.id) + '">'
     + '<span class="pc-top"><span class="pc-glyph">' + g + '</span><span class="pc-arrow">' + ICON.arrow + '</span></span>'
     + '<span class="pc-name">' + esc(p.name) + '</span>'
     + '<span class="pc-handle" data-handle="' + esc(p.handle) + '" title="Copiar usuario">' + esc(p.handle) + '</span>'
@@ -985,7 +1099,6 @@ function render(){
     $('#footOwner').textContent   = state.owner || '';
     $('#footYear').textContent    = now.getFullYear();
 
-    /* El punto verde "En línea" siempre está activo; solo cambia el texto */
     $('#updChip').textContent = state.updatedAt
       ? 'Actualizado el ' + new Date(state.updatedAt).toLocaleDateString('es-ES', { day:'2-digit', month:'2-digit', year:'numeric' })
       : 'En línea';
@@ -1011,12 +1124,35 @@ function render(){
   }
 }
 
+/* Clic en tarjeta de plataforma → abre la ventana con fondo y descripción */
+document.addEventListener('click', function(e){
+  var card = e.target.closest('[data-plat]');
+  if (card){
+    e.preventDefault();
+    if (e.target.closest('[data-handle]')) return; /* copiar usuario tiene prioridad */
+    var p = null;
+    state.platforms.forEach(function(x){ if (x.id === card.dataset.plat) p = x; });
+    if (p) openPlatModal(p);
+    return;
+  }
+  var h = e.target.closest('[data-handle]');
+  if (h){
+    e.preventDefault();
+    e.stopPropagation();
+    copyText(h.dataset.handle);
+    return;
+  }
+  var nl = e.target.closest('[data-nolink="1"]');
+  if (nl){
+    e.preventDefault();
+    toast('Añade un enlace desde el icono de ojo (Control del sitio).');
+  }
+});
+
 /* ============ Control del sitio: cuenta ÚNICA del propietario ============ */
 var authMode = 'enter';
 function openAuth(){
   closeAdminMenu();
-  /* Cuenta única: si ya existe una contraseña, SIEMPRE es modo entrar.
-     Nunca se vuelve a ofrecer la creación. */
   authMode = state.admin.pass ? 'enter' : 'create';
   $('#authTitle').textContent = authMode === 'create' ? 'Crea tu cuenta única' : 'Acceso restringido';
   $('#authSub').textContent = authMode === 'create'
@@ -1166,6 +1302,10 @@ function renderEdPlats(){
       + '<label class="field"><span>Cantidad</span><input class="input" data-field="count" type="number" min="0" inputmode="numeric" value="' + (+p.count || 0) + '"></label>'
       + '<label class="field"><span>Etiqueta</span><input class="input" data-field="label" value="' + esc(p.label) + '" placeholder="seguidores"></label>'
       + '<label class="field"><span>Enlace</span><input class="input" data-field="url" value="' + esc(p.url) + '" placeholder="https://…"></label>'
+      + '<label class="field wide"><span>Fondo de la ventana (URL de imagen o color)</span>'
+      + '<input class="input" data-field="bg" value="' + esc(p.bg || '') + '" placeholder="https://imagen.jpg  ·o·  #1877F2"></label>'
+      + '<label class="field wide"><span>Descripción (se muestra en la ventana)</span>'
+      + '<textarea class="input ta" data-field="desc" placeholder="Cuenta qué encuentra la gente al seguirte…">' + esc(p.desc || '') + '</textarea></label>'
       + '</div><div class="gprow">' + gps + '</div></div>';
   }).join('');
 }
@@ -1239,7 +1379,7 @@ drawerEl.addEventListener('click', function(e){
   }
 };
  $('#edAddP').onclick = function(){
-  draft.platforms.push({ id: uid(), name:'', handle:'', count:0, url:'', label:'', glyph:'asterisk', _auto:true });
+  draft.platforms.push({ id: uid(), name:'', handle:'', count:0, url:'', label:'', glyph:'asterisk', bg:'', desc:'', _auto:true });
   renderEdPlats();
   var last = $('#edPlats').lastElementChild;
   if (last){
@@ -1272,6 +1412,8 @@ drawerEl.addEventListener('click', function(e){
       toast('Hay una plataforma sin nombre.');
       return;
     }
+    if (typeof p2.bg !== 'string') p2.bg = '';
+    if (typeof p2.desc !== 'string') p2.desc = '';
   }
   draft.sys2 = { name: 'Sitio web 2', url: $('#edSys2Url').value.trim() };
   var nu = $('#edAdminUser').value.trim();
@@ -1315,24 +1457,9 @@ addEventListener('keydown', function(e){
   }
   if (e.key === 'Escape'){
     if (adminMenu.classList.contains('open')) closeAdminMenu();
+    else if (platOverlay.classList.contains('open')) closePlatModal();
     else if (authOverlay.classList.contains('open')) closeAuth();
     else if (drawerEl.classList.contains('open')) closeDrawer();
-  }
-});
-
-/* ============ Copiar usuario / enlace faltante ============ */
-document.addEventListener('click', function(e){
-  var h = e.target.closest('[data-handle]');
-  if (h){
-    e.preventDefault();
-    e.stopPropagation();
-    copyText(h.dataset.handle);
-    return;
-  }
-  var nl = e.target.closest('[data-nolink="1"]');
-  if (nl){
-    e.preventDefault();
-    toast('Añade un enlace desde el icono de ojo (Control del sitio).');
   }
 });
 
