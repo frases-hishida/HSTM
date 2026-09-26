@@ -17,10 +17,10 @@
     --hair:rgba(245,245,242,.28);
     --soft:rgba(245,245,242,.055);
     --shadow:0 24px 55px -28px rgba(0,0,0,.85);
-    /* Oscuro translúcido SUAVE */
-    --press:rgba(0,0,0,.26);
-    --press-2:rgba(0,0,0,.40);
-    --press-line:rgba(245,245,242,.28);
+    /* Oscuro translúcido visible para hover / selección */
+    --press:rgba(0,0,0,.48);
+    --press-2:rgba(0,0,0,.66);
+    --press-line:rgba(245,245,242,.34);
   }
   :root[data-theme="light"]{
     --bg:#FAFAF8; --bg-soft:rgba(250,250,248,.72);
@@ -30,10 +30,9 @@
     --hair:rgba(16,16,18,.26);
     --soft:rgba(16,16,18,.045);
     --shadow:0 24px 50px -28px rgba(16,16,18,.22);
-    /* Rojo claro transparente */
-    --press:rgba(226,72,58,.10);
-    --press-2:rgba(226,72,58,.20);
-    --press-line:rgba(226,72,58,.42);
+    --press:rgba(16,16,18,.09);
+    --press-2:rgba(16,16,18,.16);
+    --press-line:rgba(16,16,18,.34);
   }
   *{margin:0;padding:0;box-sizing:border-box}
   html{scroll-behavior:smooth;scroll-padding-top:90px}
@@ -57,56 +56,28 @@
     border-bottom:1px solid var(--line);transition:background-color .5s,border-color .5s;
   }
   .nav-in{max-width:1120px;margin:0 auto;display:flex;align-items:center;gap:14px;padding:11px clamp(18px,4vw,40px)}
-
-  /* Menú de sistemas */
-  .admin-wrap{position:relative;flex:none}
   .admin-btn{
-    display:flex;align-items:center;gap:9px;
-    padding:5px 12px 5px 5px;border:1px solid var(--line);border-radius:999px;
+    display:flex;align-items:center;gap:9px;flex:none;
+    padding:5px 13px 5px 5px;border:1px solid var(--line);border-radius:999px;
     transition:border-color .25s,background-color .25s;
   }
-  .admin-btn:hover,.admin-btn.active{background:var(--press);border-color:var(--press-line)}
+  .admin-btn:hover{background:var(--press);border-color:var(--press-line)}
+  .admin-btn:active{background:var(--press-2)}
   .ab-fs{
     width:30px;height:30px;border-radius:50%;background:var(--fg);color:var(--bg);
     display:grid;place-items:center;font-family:'Space Grotesk';font-weight:700;font-size:12px;flex:none;
     transition:background-color .5s,color .5s;
   }
   .ab-name{font-family:'Space Grotesk';font-weight:600;font-size:13px;letter-spacing:.02em;white-space:nowrap}
-  .ab-chev{width:11px;height:11px;transition:transform .3s;opacity:.6}
-  .admin-btn.active .ab-chev{transform:rotate(180deg)}
-  .admin-menu{
-    position:absolute;top:calc(100% + 10px);left:0;z-index:80;
-    width:250px;background:var(--card);border:1px solid var(--line);border-radius:18px;
-    box-shadow:var(--shadow);padding:8px;
-    opacity:0;transform:translateY(-6px) scale(.98);pointer-events:none;
-    transition:opacity .25s,transform .25s,background-color .5s,border-color .5s;
-  }
-  .admin-menu.open{opacity:1;transform:none;pointer-events:auto}
-  .am-label{
-    display:block;font-family:'Space Grotesk';font-size:9px;font-weight:600;
-    letter-spacing:.16em;text-transform:uppercase;color:var(--mut);padding:6px 10px 8px;
-  }
-  .am-item{
-    width:100%;display:flex;align-items:center;gap:11px;text-align:left;
-    padding:10px 10px;border-radius:12px;
-    transition:background-color .2s,border-color .2s;border:1px solid transparent;
-  }
-  .am-item:hover{background:var(--press);border-color:var(--press-line)}
-  .am-ico{
-    width:32px;height:32px;border:1px solid var(--line);border-radius:10px;flex:none;
-    display:grid;place-items:center;
-  }
-  .am-ico svg{width:14px;height:14px}
-  .am-text{display:flex;flex-direction:column;gap:1px;min-width:0}
-  .am-text b{font-size:13.5px;font-weight:700;letter-spacing:-.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .am-text small{font-family:'Space Grotesk';font-size:9.5px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--mut)}
-
+  .ab-lock{width:11px;height:11px;opacity:0;transition:opacity .25s;flex:none}
+  .admin-btn:hover .ab-lock{opacity:.65}
   .nav-links{display:flex;gap:22px;margin-left:auto}
   .nav-links a{font-size:13px;font-weight:600;color:var(--mut);text-decoration:none;transition:color .25s}
   .nav-links a:hover{color:var(--fg)}
   .icon-btn{
     width:36px;height:36px;border-radius:50%;border:1px solid var(--line);flex:none;
-    display:grid;place-items:center;transition:background-color .25s,border-color .25s;
+    display:grid;place-items:center;
+    transition:background-color .25s,border-color .25s;
   }
   .icon-btn:hover{background:var(--press);border-color:var(--press-line)}
   .icon-btn:active{background:var(--press-2)}
@@ -131,6 +102,7 @@
     transition:background-color .25s,border-color .25s;
   }
   .add-btn:hover{background:var(--press);border-color:var(--press-line)}
+  .add-btn:active{background:var(--press-2)}
   .ghost-btn{
     background:none;border:0;cursor:pointer;font-size:12px;font-weight:600;color:var(--mut);
     text-decoration:underline;text-underline-offset:3px;transition:color .2s;padding:2px 0;
@@ -221,6 +193,7 @@
     padding:14px 14px 15px;text-decoration:none;
     transition:background-color .3s,border-color .3s,transform .3s,box-shadow .3s;
   }
+  /* Al seleccionar: oscuro translúcido visible, sin invertir a blanco */
   .pcard:hover{
     background:var(--press);border-color:var(--press-line);
     transform:translateY(-2px);box-shadow:var(--shadow);
@@ -348,6 +321,7 @@
   .gp svg{width:16px;height:16px}
   .gp:hover{background:var(--press);border-color:var(--press-line)}
   .gp.sel{background:var(--press);border-color:var(--fg)}
+  .gp.sel:active{background:var(--press-2)}
   .ed-empty{color:var(--mut);font-size:13px;padding:12px 2px}
 
   /* ---------- Toast ---------- */
@@ -372,4 +346,45 @@
   }
   @media (max-width:720px){
     .stats{grid-template-columns:1fr}
-    .stat + .stat{border-left:0;border-top:1px solid var(--
+    .stat + .stat{border-left:0;border-top:1px solid var(--line)}
+    .q-text{min-height:0}
+  }
+  @media (max-width:600px){
+    .drawer{top:0;right:0;bottom:0;left:0;width:100%;border-radius:0}
+    .ed-grid{grid-template-columns:1fr}
+    .drawer-foot{flex-direction:column;align-items:stretch}
+    .drawer-foot-btns{display:flex;gap:10px}
+    .drawer-foot-btns .btn{flex:1}
+    .pgrid{grid-template-columns:repeat(2,1fr)}
+  }
+  @media (max-width:380px){
+    .pgrid{grid-template-columns:1fr}
+    .ab-name{display:none}
+  }
+  @media (prefers-reduced-motion:reduce){
+    *{animation:none!important;transition:none!important}
+    .rv{opacity:1}
+    html{scroll-behavior:auto}
+  }
+</style>
+</head>
+<body>
+
+<!-- Gradiente oficial de Instagram -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <linearGradient id="igGrad" x1="0" y1="1" x2="1" y2="0">
+      <stop offset="0" stop-color="#FEDA75"/>
+      <stop offset=".28" stop-color="#FA7E1E"/>
+      <stop offset=".55" stop-color="#D62976"/>
+      <stop offset=".8" stop-color="#962FBF"/>
+      <stop offset="1" stop-color="#4F5BD5"/>
+    </linearGradient>
+  </defs>
+</svg>
+
+<nav class="nav">
+  <div class="nav-in">
+    <button class="admin-btn" id="adminBtn" title="Acceso del autor" aria-label="Acceso del autor">
+      <span class="ab-fs">Fs</span>
+      <span class
