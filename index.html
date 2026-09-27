@@ -14,7 +14,6 @@
   :root[data-theme="dark"]{
     --bg:#0A0A0B;
     --card:rgba(16,16,19,.55);
-    --card-solid:#131315;
     --bg-soft:rgba(10,10,11,.55);
     --drawer-bg:rgba(16,16,19,.88);
     --modal-bg:rgba(20,20,24,.9);
@@ -29,11 +28,11 @@
     --press-line:rgba(255,255,255,.38);
     --scrim:linear-gradient(180deg, rgba(8,8,10,.62) 0%, rgba(8,8,10,.28) 30%, rgba(8,8,10,.34) 60%, rgba(8,8,10,.8) 100%);
     --card-blur:blur(16px) saturate(1.3);
+    --fallback-bg:linear-gradient(160deg,#16161a 0%,#0c0c0e 60%,#1a1214 100%);
   }
   :root[data-theme="light"]{
     --bg:#FAFAF8;
     --card:rgba(255,255,255,.5);
-    --card-solid:#FFFFFF;
     --bg-soft:rgba(250,250,248,.5);
     --drawer-bg:rgba(252,252,250,.92);
     --modal-bg:rgba(255,255,255,.93);
@@ -48,6 +47,7 @@
     --press-line:rgba(226,72,58,.45);
     --scrim:linear-gradient(180deg, rgba(250,250,248,.55) 0%, rgba(250,250,248,.18) 30%, rgba(250,250,248,.24) 60%, rgba(250,250,248,.7) 100%);
     --card-blur:blur(16px) saturate(1.4);
+    --fallback-bg:linear-gradient(160deg,#f3f1ec 0%,#faf9f6 60%,#f5efee 100%);
   }
   *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
   html{scroll-behavior:smooth;scroll-padding-top:90px}
@@ -61,6 +61,7 @@
     position:fixed;top:0;left:0;width:100%;height:100%;
     background-size:cover;background-position:center top;
     z-index:-2;pointer-events:none;
+    background:var(--fallback-bg);
   }
   .bgscrim{
     position:fixed;top:0;left:0;width:100%;height:100%;
@@ -197,7 +198,6 @@
   :root[data-theme="light"] .sec-title{text-shadow:0 1px 10px rgba(255,255,255,.5)}
   .sec-count{font-family:'Space Grotesk';font-size:11px;font-weight:700;color:var(--mut);font-variant-numeric:tabular-nums}
 
-  /* Tarjeta de frases — SIN comillas decorativas */
   .qcard{
     position:relative;background:var(--card);
     backdrop-filter:var(--card-blur);-webkit-backdrop-filter:var(--card-blur);
@@ -495,9 +495,6 @@
 </head>
 <body>
 
-<style>
-  #bgImg{background-image:url("data:image/jpeg;base64,IMAGEN_BASE64")}
-</style>
 <div class="bgimg" id="bgImg"></div>
 <div class="bgscrim"></div>
 
@@ -585,7 +582,7 @@
 
   <footer>
     <span class="mini">© <span id="footYear"></span> · <span id="footOwner"></span></span>
-    <span class="mini">frases_hishida · v25</span>
+    <span class="mini">frases_hishida · v26</span>
   </footer>
 
 </main>
@@ -706,7 +703,7 @@
       <span class="ed-title">Fondo (URL de imagen — opcional)</span>
       <div class="ed-stack" style="margin-top:12px">
         <label class="field"><span>URL de imagen (si está vacío se usa la incrustada)</span>
-          <input class="input" id="edHeroVideo" placeholder="https://…/tu-personaje.jpg">
+          <input class="input" id="edBgImage" placeholder="https://…/tu-personaje.jpg">
         </label>
         <p class="ed-empty">El personaje ya viene incrustado en el código. Si quieres cambiarlo por otra imagen, pega aquí su URL y guarda.</p>
       </div>
@@ -756,9 +753,14 @@
 
 <script>
 /* =========================================================
-   TU PERSONAJE — pega aquí el código base64 de tu imagen
+   TU PERSONAJE — ÚNICO LUGAR donde pegas la imagen.
+   1. Ve a base64-image.de y sube tu imagen.
+   2. Copia el código que empieza con data:image/jpeg;base64,...
+   3. Reemplaza AQUÍ (todo en UNA SOLA LÍNEA, sin saltos).
+   Si lo dejas vacío (''), el fondo muestra un degradado elegante
+   y nada se rompe.
 ========================================================= */
-var BG_IMAGE = "IMAGEN_BASE64";
+var BG_IMAGE = ""; /* ← pega aquí tu imagen base64, ejemplo: "data:image/jpeg;base64,/9j/4AAQ..." */
 
 /* NUBE DE PUBLICACIÓN — pega aquí tu ID cuando la crees (una sola vez) */
 var CLOUD_ID = '';
@@ -803,6 +805,15 @@ function copyRaw(t, msg){
   } else fallback();
 }
 function copyText(t){ copyRaw(t, 'Copiado: ' + t); }
+
+/* Valida que el valor sea una imagen usable (data: o http/https) */
+function validBg(v){
+  v = (v || '').trim();
+  if (!v) return '';
+  if (v.indexOf('data:image/') === 0) return v;
+  if (/^https?:\/\/\S+$/i.test(v)) return v;
+  return '';
+}
 
 /* ============ ICONOS OFICIALES CON COLOR DE MARCA ============ */
 var TT_PATH = 'M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z';
@@ -863,8 +874,12 @@ var ICON = {
   moon: '<path d="M20 13.6A8 8 0 1 1 10.4 4 6.4 6.4 0 0 0 20 13.6z"/>'
 };
 
-/* ============ Estado — TUS DATOS REALES ============ */
-var LS_KEY = 'fh.kit.v24';
+/* ============ Estado — TUS DATOS REALES ============
+   v26: clave nueva + migración automática de datos viejos
+   (recupera tu contraseña y configuración de versiones previas)
+========================================================= */
+var LS_KEY = 'fh.kit.v26';
+var LS_OLD_KEYS = ['fh.kit.v24', 'fh.kit.v11'];
 var LS_CLOUD = 'fh.cloudid.v1';
 
 var SEED = {
@@ -924,26 +939,56 @@ function autoFixGlyphs(plats){
   return fixed;
 }
 
+/* Normaliza un objeto guardado (de cualquier versión) a la estructura actual */
+function normalizeSaved(saved){
+  var out = {};
+  if (typeof saved.owner === 'string' && saved.owner) out.owner = saved.owner;
+  if (typeof saved.tagline === 'string') out.tagline = saved.tagline;
+  /* bgImage: acepta bgImage nuevo o heroVideo viejo (si es imagen o URL) */
+  var bg = '';
+  if (typeof saved.bgImage === 'string') bg = saved.bgImage;
+  else if (typeof saved.heroVideo === 'string' && !/\.(mp4|webm|mov)(\?|#|$)/i.test(saved.heroVideo)) bg = saved.heroVideo;
+  if (bg) out.bgImage = bg;
+  if (saved.admin && typeof saved.admin === 'object'){
+    out.admin = {};
+    if (saved.admin.user) out.admin.user = saved.admin.user;
+    if (saved.admin.pass) out.admin.pass = saved.admin.pass;
+  }
+  if (saved.sys2 && typeof saved.sys2 === 'object' && typeof saved.sys2.url === 'string'){
+    out.sys2 = { url: saved.sys2.url };
+  }
+  if (isArr(saved.phrases)) out.phrases = saved.phrases;
+  if (isArr(saved.platforms) && saved.platforms.length) out.platforms = saved.platforms;
+  if (saved.updatedAt) out.updatedAt = saved.updatedAt;
+  return out;
+}
+
 function load(){
   var out = clone(BASE);
   try {
-    var r = localStorage.getItem(LS_KEY);
-    if (r){
-      var saved = JSON.parse(r);
+    var raw = localStorage.getItem(LS_KEY);
+    /* Migración: si no hay datos en la clave nueva, busca en las viejas */
+    if (!raw){
+      for (var k = 0; k < LS_OLD_KEYS.length; k++){
+        var old = localStorage.getItem(LS_OLD_KEYS[k]);
+        if (old){ raw = old; break; }
+      }
+    }
+    if (raw){
+      var saved = JSON.parse(raw);
       if (saved && typeof saved === 'object'){
-        if (typeof saved.owner === 'string' && saved.owner) out.owner = saved.owner;
-        if (typeof saved.tagline === 'string') out.tagline = saved.tagline;
-        if (typeof saved.bgImage === 'string') out.bgImage = saved.bgImage;
-        if (saved.admin && typeof saved.admin === 'object'){
-          if (saved.admin.user) out.admin.user = saved.admin.user;
-          if (saved.admin.pass) out.admin.pass = saved.admin.pass;
+        var n = normalizeSaved(saved);
+        if (n.owner) out.owner = n.owner;
+        if (typeof n.tagline === 'string') out.tagline = n.tagline;
+        if (typeof n.bgImage === 'string') out.bgImage = n.bgImage;
+        if (n.admin){
+          if (n.admin.user) out.admin.user = n.admin.user;
+          if (n.admin.pass) out.admin.pass = n.admin.pass;
         }
-        if (saved.sys2 && typeof saved.sys2 === 'object'){
-          out.sys2.url = typeof saved.sys2.url === 'string' ? saved.sys2.url : out.sys2.url;
-        }
-        if (isArr(saved.phrases)) out.phrases = saved.phrases;
-        if (isArr(saved.platforms) && saved.platforms.length) out.platforms = saved.platforms;
-        if (saved.updatedAt) out.updatedAt = saved.updatedAt;
+        if (n.sys2) out.sys2.url = n.sys2.url;
+        if (isArr(n.phrases)) out.phrases = n.phrases;
+        if (isArr(n.platforms) && n.platforms.length) out.platforms = n.platforms;
+        if (n.updatedAt) out.updatedAt = n.updatedAt;
       }
     }
   } catch(e){}
@@ -957,6 +1002,8 @@ for (var _i = 0; _i < state.phrases.length; _i++){
   if (!state.phrases[_i].by) state.phrases[_i].by = 'admin';
 }
 autoFixGlyphs(state.platforms);
+/* Guarda ya en la clave nueva para no repetir la migración */
+persist();
 
 /* =========================================================
    NUBE DE PUBLICACIÓN CON 4 SERVICIOS EN CASCADA
@@ -1161,13 +1208,19 @@ function syncScrollLock(){
   document.body.style.overflow = open ? 'hidden' : '';
 }
 
-/* Fondo — prioridad: URL del panel > imagen incrustada */
+/* Fondo — prioridad: URL del panel > imagen incrustada > degradado.
+   Un valor inválido (como un base64 mal pegado) se ignora sin romper. */
 function applyHeroBg(){
   var el = $('#bgImg');
   if (!el) return;
-  var custom = (state.bgImage || '').trim();
-  var src = custom || BG_IMAGE;
-  if (!src) return;
+  var custom = validBg(state.bgImage);
+  var embedded = validBg(BG_IMAGE);
+  var src = custom || embedded;
+  if (!src){
+    el.style.backgroundImage = '';
+    el.dataset.src = '';
+    return;
+  }
   if (el.dataset.src === src) return;
   el.dataset.src = src;
   el.style.backgroundImage = 'url("' + src.replace(/"/g, '%22') + '")';
@@ -1693,7 +1746,7 @@ function openDrawer(){
   draft = clone(state);
   $('#edOwner').value = draft.owner || '';
   $('#edTagline').value = draft.tagline || '';
-  $('#edHeroVideo').value = (draft.bgImage || '').trim();
+  $('#edBgImage').value = (draft.bgImage || '').trim();
   $('#edSys2Url').value  = (draft.sys2 && draft.sys2.url)  || '';
   $('#edAdminUser').value = draft.admin.user || '';
   $('#edNewPass').value = '';
@@ -1866,7 +1919,7 @@ function applySave(){
     if (typeof p2.bg !== 'string') p2.bg = '';
     if (typeof p2.desc !== 'string') p2.desc = '';
   }
-  draft.bgImage = $('#edHeroVideo').value.trim();
+  draft.bgImage = $('#edBgImage').value.trim();
   draft.sys2 = { name: 'Sitio web 2', url: $('#edSys2Url').value.trim() };
   var nu = $('#edAdminUser').value.trim();
   if (nu){
