@@ -6,7 +6,7 @@
 <meta name="theme-color" content="#0A0A0B">
 <title>Hishida — Frases</title>
 <script>try{document.documentElement.dataset.theme=localStorage.getItem('fh.theme')||'dark'}catch(e){}</script>
-<!-- DATOS PUBLICADOS: este archivo (que subes a GitHub) es lo que ven TODOS los visitantes -->
+<!-- DATOS PUBLICADOS (opcional): si algún día subes datos.js a GitHub, se carga aquí -->
 <script src="datos.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -270,7 +270,7 @@
   }
   #authOverlay.open .modal,#pubOverlay.open .modal{transform:none}
 
-  /* ---------- Ventana de publicación ---------- */
+  /* ---------- Ventana de publicación manual (respaldo) ---------- */
   .pub-code{
     width:100%;min-height:110px;max-height:180px;resize:vertical;
     background:var(--soft);border:1px solid var(--line);border-radius:12px;
@@ -413,7 +413,7 @@
   .gp svg{width:16px;height:16px}
   .gp:hover,.gp:active{background:var(--press);border-color:var(--press-line)}
   .gp.sel{background:var(--press);border-color:var(--fg)}
-  .ed-empty{color:var(--mut);font-size:13px;padding:12px 2px}
+  .ed-empty{color:var(--mut);font-size:13px;padding:12px 2px;line-height:1.6}
 
   /* ---------- Toast ---------- */
   .toast{
@@ -542,12 +542,12 @@
 
   <footer>
     <span class="mini">© <span id="footYear"></span> · <span id="footOwner"></span></span>
-    <span class="mini">frases_hishida · v14</span>
+    <span class="mini">frases_hishida · v15</span>
   </footer>
 
 </main>
 
-<!-- ===== Ventana de plataforma: fondo editable + descripción ===== -->
+<!-- ===== Ventana de plataforma ===== -->
 <div class="overlay" id="platOverlay">
   <div class="pmodal" role="dialog" aria-modal="true" aria-labelledby="pmName">
     <div class="pm-bg" id="pmBg"></div>
@@ -565,17 +565,17 @@
   </div>
 </div>
 
-<!-- ===== Publicar para todos ===== -->
+<!-- ===== Publicación manual (respaldo si no hay Bin ID) ===== -->
 <div class="overlay" id="pubOverlay">
   <div class="modal" role="dialog" aria-modal="true" aria-labelledby="pubTitle">
     <div class="modal-head">
-      <span class="kicker">Publicar para todos</span>
+      <span class="kicker">Publicación manual</span>
       <button class="icon-btn sm" id="pubClose" aria-label="Cerrar">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
       </button>
     </div>
-    <h3 id="pubTitle">Sube tus cambios a GitHub</h3>
-    <p class="modal-sub">Copia este código y súbelo como archivo <b>datos.js</b> en tu repositorio. Así todos los visitantes verán tus cambios.</p>
+    <h3 id="pubTitle">Método respaldo: datos.js</h3>
+    <p class="modal-sub">Para publicar AUTOMÁTICAMENTE, configura JSONBin (sección "Publicación automática" del panel). Este método manual es el respaldo.</p>
     <textarea class="pub-code" id="pubCode" readonly spellcheck="false"></textarea>
     <button type="button" class="btn primary full" id="pubCopy">Copiar código</button>
     <ol class="pub-steps">
@@ -584,7 +584,6 @@
       <li>Nómbralo exactamente <b>datos.js</b> y pega el código.</li>
       <li>Toca <b>Commit changes</b> y espera 1-2 minutos.</li>
     </ol>
-    <p class="pub-note">Si datos.js ya existe: ábrelo, borra todo, pega el nuevo y guarda. Tu contraseña nunca se publica.</p>
   </div>
 </div>
 
@@ -668,6 +667,16 @@
     </section>
 
     <section class="ed-sec">
+      <span class="ed-title">Publicación automática (JSONBin)</span>
+      <div class="ed-stack" style="margin-top:12px">
+        <label class="field"><span>Tu clave secreta (X-Master-Key de jsonbin.io)</span>
+          <input class="input" id="edPubKey" type="password" autocomplete="off" placeholder="Pégala aquí (solo se guarda en tu teléfono)">
+        </label>
+        <span class="ed-empty" id="edPubStatus"></span>
+      </div>
+    </section>
+
+    <section class="ed-sec">
       <span class="ed-title">Seguridad</span>
       <div class="ed-stack" style="margin-top:12px">
         <label class="field"><span>Usuario</span><input class="input" id="edAdminUser" autocomplete="off" spellcheck="false"></label>
@@ -678,7 +687,7 @@
   </div>
 
   <footer class="drawer-foot">
-    <span class="mini">«Guardar» = vista previa local. «Publicar» = genera el código para que TODOS lo vean.</span>
+    <span class="mini">«Guardar» = vista previa local. «Publicar» = envía los cambios a todos los visitantes.</span>
     <div class="drawer-foot-btns">
       <button class="btn ghost" id="edDiscard">Descartar</button>
       <button class="btn ghost" id="edSave">Guardar</button>
@@ -690,7 +699,16 @@
 <div class="toast" id="toast" role="status"></div>
 
 <script>
-/* ============ Utilidades (compatibles con Android antiguos) ============ */
+/* =========================================================
+   PUBLICACIÓN AUTOMÁTICA — CONFIGURA AQUÍ (una sola vez)
+   1. Crea cuenta gratis en jsonbin.io
+   2. Create Bin → copia el "Bin ID"
+   3. Pégalo abajo entre las comillas y sube este archivo a GitHub
+   4. Tu X-Master-Key se pega después desde el panel del sitio
+========================================================= */
+var JSONBIN_BIN_ID = ''; /* ← PEGA AQUÍ TU BIN ID, ejemplo: '65a1b2c3d4e5f67890123456' */
+
+/* ============ Utilidades ============ */
 function $(s){ return document.querySelector(s); }
 function esc(s){
   return String(s == null ? '' : s).replace(/[&<>"']/g, function(c){
@@ -733,14 +751,9 @@ function copyText(t){ copyRaw(t, 'Copiado: ' + t); }
 
 /* =========================================================
    REDIRECCIÓN DIRECTA — sin "copiar enlace"
-   1. Intenta abrir la APP nativa (TikTok, Instagram, etc.).
-   2. Si la app no responde, navega a la web en el navegador.
-   3. Método doble para máxima compatibilidad con webviews.
 ========================================================= */
 var UA = (navigator.userAgent || '').toLowerCase();
 var IS_ANDROID = UA.indexOf('android') > -1;
-
-/* Esquemas de app nativa por plataforma (Android) */
 var APP_SCHEMES = {
   tiktok:    'snssdk1233://',
   instagram: 'instagram://',
@@ -758,27 +771,22 @@ function detectBrand(url){
   return null;
 }
 function navigateTo(url){
-  /* Si no es Android, la navegación directa funciona en todos los casos */
   if (!IS_ANDROID){
     window.location.href = url;
     return;
   }
-  /* En Android: intenta abrir la app nativa primero */
   var brand = detectBrand(url);
   var scheme = brand ? APP_SCHEMES[brand] : null;
   if (scheme){
-    var t0 = Date.now();
     var left = false;
     function onLeave(){ left = true; }
     document.addEventListener('visibilitychange', onLeave, { once:true });
     window.addEventListener('pagehide', onLeave, { once:true });
-    /* Intento de app nativa */
     var ifr = document.createElement('iframe');
     ifr.style.cssText = 'position:fixed;width:0;height:0;border:0;opacity:0';
     ifr.src = scheme;
     document.body.appendChild(ifr);
     setTimeout(function(){ ifr.remove(); }, 1200);
-    /* Si en 1.2s la página sigue visible, la app no abrió: navega a la web */
     setTimeout(function(){
       if (!left && !document.hidden){
         window.location.href = url;
@@ -848,8 +856,12 @@ var ICON = {
   moon: '<path d="M20 13.6A8 8 0 1 1 10.4 4 6.4 6.4 0 0 0 20 13.6z"/>'
 };
 
-/* ============ Estado base ============ */
+/* ============ Estado base ============
+   Prioridad: SEED → datos.js → caché de lo publicado → ajustes locales del dueño */
 var LS_KEY = 'fh.kit.v10';
+var PUB_CACHE_KEY = 'fh.pubcache.v1';
+var PUBKEY_KEY = 'fh.jsonbin.key';
+
 var SEED = {
   admin: { user:'frases_hishida', pass:null },
   sys2:  { name:'Sitio web 2', url:'https://frases-hishida.github.io/fsapp/' },
@@ -871,16 +883,32 @@ var SEED = {
   ]
 };
 
-var BASE = clone(SEED);
-if (window.DATOS_PUBLICOS && typeof window.DATOS_PUBLICOS === 'object'){
-  var _D = window.DATOS_PUBLICOS;
-  if (typeof _D.owner === 'string' && _D.owner) BASE.owner = _D.owner;
-  if (typeof _D.tagline === 'string') BASE.tagline = _D.tagline;
-  if (isArr(_D.phrases) && _D.phrases.length) BASE.phrases = _D.phrases;
-  if (isArr(_D.platforms) && _D.platforms.length) BASE.platforms = _D.platforms;
-  if (_D.sys2 && typeof _D.sys2.url === 'string') BASE.sys2.url = _D.sys2.url;
-  if (_D.updatedAt) BASE.updatedAt = _D.updatedAt;
+/* Si el Bin ID viene dentro de datos.js, también se acepta */
+if (window.DATOS_PUBLICOS && window.DATOS_PUBLICOS.binId && !JSONBIN_BIN_ID){
+  JSONBIN_BIN_ID = String(window.DATOS_PUBLICOS.binId);
 }
+
+var BASE = clone(SEED);
+function mergePublic(rec){
+  if (!rec || typeof rec !== 'object') return;
+  if (typeof rec.owner === 'string' && rec.owner) BASE.owner = rec.owner;
+  if (typeof rec.tagline === 'string') BASE.tagline = rec.tagline;
+  if (isArr(rec.phrases) && rec.phrases.length) BASE.phrases = rec.phrases;
+  if (isArr(rec.platforms) && rec.platforms.length) BASE.platforms = rec.platforms;
+  if (rec.sys2 && typeof rec.sys2.url === 'string') BASE.sys2.url = rec.sys2.url;
+  if (rec.updatedAt) BASE.updatedAt = rec.updatedAt;
+}
+/* 1. datos.js (si existe) */
+if (window.DATOS_PUBLICOS && typeof window.DATOS_PUBLICOS === 'object'){
+  mergePublic(window.DATOS_PUBLICOS);
+}
+/* 2. caché local de lo publicado (evita ver datos viejos mientras carga) */
+(function(){
+  try {
+    var c = localStorage.getItem(PUB_CACHE_KEY);
+    if (c) mergePublic(JSON.parse(c));
+  } catch(e){}
+})();
 
 var KNOWN_BRANDS = ['facebook','youtube','whatsapp','instagram','tiktok'];
 var NAME_TO_BRAND = [
@@ -940,6 +968,69 @@ for (var _i = 0; _i < state.phrases.length; _i++){
 }
 autoFixGlyphs(state.platforms);
 
+/* =========================================================
+   JSONBIN: leer (todos) y escribir (solo tú)
+========================================================= */
+function getMasterKey(){
+  try { return localStorage.getItem(PUBKEY_KEY) || ''; } catch(e){ return ''; }
+}
+function setMasterKey(k){
+  try { localStorage.setItem(PUBKEY_KEY, k); } catch(e){}
+}
+function fetchPublished(cb){
+  if (!JSONBIN_BIN_ID){ cb(null); return; }
+  var done = false;
+  var x = new XMLHttpRequest();
+  x.open('GET', 'https://api.jsonbin.io/v3/b/' + JSONBIN_BIN_ID + '/latest?_=' + Date.now(), true);
+  x.timeout = 8000;
+  x.onload = function(){
+    if (done) return; done = true;
+    try {
+      var j = JSON.parse(x.responseText);
+      cb(j && j.record ? j.record : null);
+    } catch(e){ cb(null); }
+  };
+  x.onerror = x.ontimeout = function(){
+    if (done) return; done = true;
+    cb(null);
+  };
+  x.send();
+}
+function pushPublished(record, ok, fail){
+  var key = getMasterKey();
+  if (!JSONBIN_BIN_ID || !key){ fail('sin configurar'); return; }
+  var x = new XMLHttpRequest();
+  x.open('PUT', 'https://api.jsonbin.io/v3/b/' + JSONBIN_BIN_ID, true);
+  x.setRequestHeader('Content-Type', 'application/json');
+  x.setRequestHeader('X-Master-Key', key);
+  x.setRequestHeader('X-Bin-Versioning', 'false');
+  x.timeout = 10000;
+  x.onload = function(){
+    if (x.status >= 200 && x.status < 300) ok();
+    else fail('error ' + x.status);
+  };
+  x.onerror = function(){ fail('sin conexión'); };
+  x.ontimeout = function(){ fail('sin conexión'); };
+  x.send(JSON.stringify(record));
+}
+/* Carga asíncrona de lo publicado: al llegar, actualiza lo que ven TODOS */
+function refreshFromPublished(){
+  fetchPublished(function(rec){
+    if (!rec) return;
+    try { localStorage.setItem(PUB_CACHE_KEY, JSON.stringify(rec)); } catch(e){}
+    mergePublic(rec);
+    state = load();
+    if (!isArr(state.phrases)) state.phrases = clone(SEED.phrases);
+    if (!isArr(state.platforms)) state.platforms = clone(SEED.platforms);
+    for (var i = 0; i < state.phrases.length; i++){
+      if (!state.phrases[i].by) state.phrases[i].by = 'admin';
+    }
+    autoFixGlyphs(state.platforms);
+    qi = 0; qElapsed = 0;
+    render();
+  });
+}
+
 var unlocked = false;
 var prevCounts = {};
 
@@ -982,7 +1073,7 @@ function toast(msg){
   t.textContent = msg;
   t.classList.add('show');
   clearTimeout(toastTimer);
-  toastTimer = setTimeout(function(){ t.classList.remove('show'); }, 2600);
+  toastTimer = setTimeout(function(){ t.classList.remove('show'); }, 3000);
 }
 
 /* ============ Menú de sitios ============ */
@@ -1015,9 +1106,10 @@ document.addEventListener('click', function(e){
   if (unlocked) openDrawer(); else openAuth();
 };
 
-/* ============ Publicar para todos ============ */
-function buildDatosJs(){
-  var pub = {
+/* ============ Publicación ============ */
+function buildPublicRecord(){
+  return {
+    binId: JSONBIN_BIN_ID || undefined,
     owner: state.owner,
     tagline: state.tagline,
     updatedAt: Date.now(),
@@ -1027,7 +1119,9 @@ function buildDatosJs(){
     }),
     sys2: { name:'Sitio web 2', url:(state.sys2 && state.sys2.url) || '' }
   };
-  return 'window.DATOS_PUBLICOS = ' + JSON.stringify(pub) + ';';
+}
+function buildDatosJs(){
+  return 'window.DATOS_PUBLICOS = ' + JSON.stringify(buildPublicRecord()) + ';';
 }
 function openPub(){
   $('#pubCode').value = buildDatosJs();
@@ -1043,12 +1137,33 @@ pubOverlay.addEventListener('click', function(e){
   if (e.target === e.currentTarget) closePub();
 });
  $('#pubCopy').onclick = function(){
-  copyRaw($('#pubCode').value, 'Código copiado. Ahora pégalo en GitHub como datos.js');
+  copyRaw($('#pubCode').value, 'Código copiado. Pégalo en GitHub como datos.js');
 };
  $('#pubCode').addEventListener('focus', function(){
   var ta = this;
   setTimeout(function(){ ta.select(); }, 10);
 });
+
+function tryPublish(){
+  if (!JSONBIN_BIN_ID){
+    openPub(); /* respaldo manual */
+    return;
+  }
+  var key = getMasterKey();
+  if (!key){
+    toast('Primero pega tu Master Key en el panel (Publicación automática).');
+    openDrawer();
+    return;
+  }
+  toast('Publicando…');
+  pushPublished(buildPublicRecord(), function(){
+    toast('¡Publicado! Todos los visitantes verán los cambios en segundos.');
+    try { localStorage.setItem(PUB_CACHE_KEY, JSON.stringify(buildPublicRecord())); } catch(e){}
+  }, function(err){
+    toast('No se pudo publicar (' + err + '). Abre el método manual.');
+    openPub();
+  });
+}
 
 /* ============ Ventana de plataforma ============ */
 function openPlatModal(p){
@@ -1364,6 +1479,11 @@ authOverlay.addEventListener('click', function(e){
 
 /* ============ Panel del propietario ============ */
 var draft = null;
+function pubStatusText(){
+  if (!JSONBIN_BIN_ID) return 'Falta el Bin ID: pégalo en el HTML (línea JSONBIN_BIN_ID) y súbelo a GitHub. Mientras tanto funciona el método manual.';
+  if (!getMasterKey()) return 'Pega tu X-Master-Key de jsonbin.io aquí y guarda. Después, Publicar enviará todo automáticamente.';
+  return 'Lista: el botón Publicar envía los cambios a todos los visitantes automáticamente.';
+}
 function openDrawer(){
   if (!unlocked){ openAuth(); return; }
   draft = clone(state);
@@ -1371,8 +1491,10 @@ function openDrawer(){
   $('#edTagline').value = draft.tagline || '';
   $('#edSys2Url').value  = (draft.sys2 && draft.sys2.url)  || '';
   $('#edAdminUser').value = draft.admin.user || '';
+  $('#edPubKey').value = '';
   $('#edNewPass').value = '';
   $('#edNewPass2').value = '';
+  $('#edPubStatus').textContent = pubStatusText();
   renderEdQuotes();
   renderEdPlats();
   drawerEl.classList.add('open');
@@ -1552,6 +1674,9 @@ function applySave(){
     if (n1 !== n2)    { toast('Las contraseñas nuevas no coinciden.'); return false; }
     draft.admin.pass = hashStr(n1);
   }
+  /* Clave de publicación automática: se guarda SOLO en este dispositivo */
+  var pk = $('#edPubKey').value.trim();
+  if (pk) setMasterKey(pk);
   draft.owner = $('#edOwner').value.trim();
   draft.tagline = $('#edTagline').value.trim();
   draft.updatedAt = Date.now();
@@ -1564,13 +1689,13 @@ function applySave(){
  $('#edSave').onclick = function(){
   if (applySave()){
     closeDrawer();
-    toast('Guardado (solo se ve en este navegador). Usa Publicar para que todos lo vean.');
+    toast('Guardado (vista previa). Usa Publicar para que todos lo vean.');
   }
 };
  $('#edPublish').onclick = function(){
   if (applySave()){
     closeDrawer();
-    openPub();
+    tryPublish();
   }
 };
  $('#edDiscard').onclick = closeDrawer;
@@ -1603,6 +1728,8 @@ addEventListener('keydown', function(e){
 /* ============ Inicio ============ */
 render();
 requestAnimationFrame(qLoop);
+/* Carga en segundo plano de lo publicado: todos los dispositivos ven lo último */
+refreshFromPublished();
 </script>
 </body>
 </html>
