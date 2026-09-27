@@ -6,7 +6,6 @@
 <meta name="theme-color" content="#0A0A0B">
 <title>Hishida — Frases</title>
 <script>try{document.documentElement.dataset.theme=localStorage.getItem('fh.theme')||'dark'}catch(e){}</script>
-<!-- Respaldo opcional: datos.js en GitHub (si existe) -->
 <script src="datos.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -23,7 +22,6 @@
     --press:rgba(0,0,0,.26);
     --press-2:rgba(0,0,0,.40);
     --press-line:rgba(245,245,242,.28);
-    /* Velo adaptado a la ilustración clara, para que el texto siempre se lea */
     --scrim:linear-gradient(180deg, rgba(10,10,11,.78) 0%, rgba(10,10,11,.48) 26%, rgba(10,10,11,.52) 58%, rgba(10,10,11,.92) 100%);
   }
   :root[data-theme="light"]{
@@ -47,9 +45,6 @@
     -webkit-font-smoothing:antialiased;overflow-x:clip;
     transition:background-color .5s ease,color .5s ease;
   }
-  /* =========================================================
-     FONDO — imagen fija, cubre cualquier pantalla sin deformarse
-  ========================================================== */
   .bgimg{
     position:fixed;top:0;left:0;width:100%;height:100%;
     background-size:cover;background-position:center;
@@ -67,7 +62,6 @@
   a{color:inherit;text-decoration:none}
   .wrap{max-width:1120px;margin:0 auto;padding:0 clamp(18px,4vw,40px)}
 
-  /* ---------- Navegación ---------- */
   .nav{
     position:sticky;top:0;z-index:50;
     background:var(--bg-soft);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
@@ -147,7 +141,6 @@
   }
   .ghost-btn:hover{color:var(--fg)}
 
-  /* ---------- Hero ---------- */
   .hero{padding-top:clamp(48px,8vw,88px)}
   .kicker{font-family:'Space Grotesk';font-size:10.5px;font-weight:600;letter-spacing:.22em;text-transform:uppercase;color:var(--mut)}
   .kicker-elegant{
@@ -180,14 +173,12 @@
   }
   .hero .chip{margin-top:18px}
 
-  /* ---------- Secciones ---------- */
   section{scroll-margin-top:90px}
   #frases{margin-top:clamp(44px,7vw,80px)}
   .sec-head{display:flex;justify-content:space-between;align-items:baseline;gap:12px;margin-bottom:14px}
   .sec-title{font-family:'Space Grotesk';font-size:11px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:var(--mut)}
   .sec-count{font-family:'Space Grotesk';font-size:11px;color:var(--mut);font-variant-numeric:tabular-nums}
 
-  /* ---------- Tarjeta de frases ---------- */
   .qcard{
     position:relative;background:var(--card);border:1px solid var(--line);border-radius:20px;
     padding:clamp(18px,3.5vw,30px);box-shadow:var(--shadow);overflow:hidden;
@@ -213,7 +204,6 @@
   #qProgFill{height:100%;width:0;background:var(--fg);border-radius:2px}
   .q-copy-btn{padding:8px 15px;font-size:12px}
 
-  /* ---------- Formulario comunitario ---------- */
   .qform{
     margin-top:12px;background:var(--card);border:1px solid var(--line);border-radius:16px;
     padding:14px 16px;transition:background-color .5s,border-color .5s;
@@ -229,7 +219,6 @@
   .input:focus{border-color:var(--hair)}
   .ta{min-height:64px;resize:vertical}
 
-  /* ---------- Plataformas ---------- */
   #plataformas{margin-top:clamp(44px,7vw,80px)}
   .pgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(168px,1fr));gap:12px}
   .pcard{
@@ -268,7 +257,6 @@
   .empty-card:hover,.empty-card:active{transform:none;box-shadow:none;background:var(--card);border-color:var(--line)}
   .empty-card .pc-lab{text-transform:none;letter-spacing:.02em;font-size:12px;max-width:36ch}
 
-  /* ---------- Footer ---------- */
   footer{
     margin-top:clamp(56px,8vw,96px);padding:22px 0 40px;border-top:1px solid var(--line);
     display:flex;align-items:center;gap:14px;flex-wrap:wrap;transition:border-color .5s;
@@ -276,7 +264,6 @@
   .mini{font-family:'Space Grotesk';font-size:10.5px;font-weight:600;letter-spacing:.09em;text-transform:uppercase;color:var(--mut)}
   footer .mini:nth-child(2){margin-left:auto}
 
-  /* ---------- Overlays ---------- */
   .overlay{
     position:fixed;inset:0;z-index:100;background:rgba(0,0,0,.5);backdrop-filter:blur(4px);
     opacity:0;pointer-events:none;transition:opacity .3s;
@@ -302,12 +289,7 @@
   .pub-code:focus{border-color:var(--hair)}
   .pub-steps{margin:0;padding-left:18px;font-size:13px;line-height:1.7;color:var(--mut)}
   .pub-steps b{color:var(--fg);font-weight:700}
-  .pub-note{
-    margin-top:10px;font-family:'Space Grotesk';font-size:9.5px;font-weight:600;
-    letter-spacing:.08em;text-transform:uppercase;color:var(--mut);
-  }
 
-  /* ---------- Ventana de plataforma ---------- */
   .pmodal{
     position:relative;width:min(440px,100%);border-radius:24px;overflow:hidden;
     border:1px solid var(--line);box-shadow:var(--shadow);
@@ -371,7 +353,6 @@
   .field{display:flex;flex-direction:column;gap:5px;min-width:0}
   .field>span{font-family:'Space Grotesk';font-size:9.5px;font-weight:600;letter-spacing:.13em;text-transform:uppercase;color:var(--mut)}
 
-  /* ---------- Drawer ---------- */
   .drawer{
     position:fixed;top:12px;right:12px;bottom:12px;width:min(520px,calc(100% - 24px));z-index:120;
     background:var(--card);border:1px solid var(--line);border-radius:24px;box-shadow:var(--shadow);
@@ -445,7 +426,6 @@
     outline:none;word-break:break-all;
   }
 
-  /* ---------- Toast ---------- */
   .toast{
     position:fixed;left:50%;bottom:22px;transform:translate(-50%,12px);z-index:300;
     background:var(--fg);color:var(--bg);border-radius:999px;padding:11px 20px;
@@ -454,14 +434,12 @@
   }
   .toast.show{opacity:1;transform:translate(-50%,0)}
 
-  /* ---------- Aparición: 100% CSS ---------- */
   .rv{
     animation:rise .7s cubic-bezier(.22,.8,.24,1) both;
     animation-delay:var(--d,0s);
   }
   @keyframes rise{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
 
-  /* ---------- Responsive ---------- */
   @media (max-width:820px){
     .nav-links{display:none}
     .pgrid{grid-template-columns:repeat(auto-fill,minmax(145px,1fr))}
@@ -488,7 +466,6 @@
 </head>
 <body>
 
-<!-- Fondo: tu ilustración, fija, adaptada a cualquier pantalla -->
 <div class="bgimg" id="bgImg"></div>
 <div class="bgscrim"></div>
 
@@ -502,7 +479,6 @@
       </button>
       <div class="admin-menu" id="adminMenu" role="menu">
         <span class="am-label">Sistemas</span>
-        <!-- Enlace REAL: se abre directo, sin "copiar enlace" -->
         <a class="am-item" id="amOther" role="menuitem" href="#" target="_blank" rel="noopener">
           <span class="am-ico">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4h6v6M20 4l-9 9"/><path d="M19 13.5V18a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h4.5"/></svg>
@@ -577,7 +553,7 @@
 
   <footer>
     <span class="mini">© <span id="footYear"></span> · <span id="footOwner"></span></span>
-    <span class="mini">frases_hishida · v21</span>
+    <span class="mini">frases_hishida · v22</span>
   </footer>
 
 </main>
@@ -697,11 +673,11 @@
     <section class="ed-sec">
       <span class="ed-title">Fondo (imagen)</span>
       <div class="ed-stack" style="margin-top:12px">
-        <label class="field"><span>Archivo o URL de imagen (.jpg/.png/.webp/.gif)</span>
+        <label class="field"><span>URL de imagen (opcional — si lo dejas vacío busca fondo.jpg automáticamente)</span>
           <input class="input" id="edHeroVideo" placeholder="fondo.jpg  ·o·  https://…/imagen.jpg">
         </label>
         <p class="ed-empty" id="edBgStatus"></p>
-        <p class="ed-empty">Guarda tu imagen con el nombre <b>fondo.jpg</b> y súbelo a la raíz de tu repositorio de GitHub (Add file → Upload files). Se ve fija en toda la página, adaptada a cualquier pantalla.</p>
+        <p class="ed-empty">El sistema busca automáticamente <b>fondo.jpg</b>, <b>fondo.png</b> o <b>fondo.webp</b> en la raíz de tu repositorio. Verifica en GitHub que el archivo esté junto a <b>index.html</b> y en minúsculas.</p>
       </div>
     </section>
 
@@ -857,7 +833,9 @@ var ICON = {
 /* ============ Estado base — TUS DATOS REALES ============ */
 var LS_KEY = 'fh.kit.v11';
 var LS_CLOUD = 'fh.cloudid.v1';
-var DEFAULT_BG = 'fondo.jpg'; /* ← tu ilustración: súbela a GitHub con este nombre */
+var DEFAULT_BG = 'fondo.jpg';
+/* Nombres alternativos que se prueban solos (por si subiste png/webp o con mayúscula) */
+var BG_CANDIDATES = ['fondo.jpg','fondo.jpeg','fondo.png','fondo.webp','fondo.JPG','fondo.PNG','Fondo.jpg','Fondo.png'];
 
 var SEED = {
   admin: { user:'frases_hishida', pass:null },
@@ -881,7 +859,7 @@ function mergePublic(rec){
   if (!rec || typeof rec !== 'object') return;
   if (typeof rec.owner === 'string' && rec.owner) BASE.owner = rec.owner;
   if (typeof rec.tagline === 'string') BASE.tagline = rec.tagline;
-  if (typeof rec.heroVideo === 'string') BASE.heroVideo = rec.heroVideo;
+  if (typeof rec.heroVideo === 'string' && rec.heroVideo && !/\.(mp4|webm|mov)(\?|#|$)/i.test(rec.heroVideo)) BASE.heroVideo = rec.heroVideo;
   if (isArr(rec.phrases)) BASE.phrases = rec.phrases;
   if (isArr(rec.platforms) && rec.platforms.length) BASE.platforms = rec.platforms;
   if (rec.sys2 && typeof rec.sys2.url === 'string') BASE.sys2.url = rec.sys2.url;
@@ -925,7 +903,11 @@ function load(){
       if (saved && typeof saved === 'object'){
         if (typeof saved.owner === 'string' && saved.owner) out.owner = saved.owner;
         if (typeof saved.tagline === 'string') out.tagline = saved.tagline;
-        if (typeof saved.heroVideo === 'string') out.heroVideo = saved.heroVideo;
+        /* FIX PRINCIPAL: ignora videos guardados por versiones anteriores
+           (fondo.mp4 etc.) y usa la imagen por defecto */
+        if (typeof saved.heroVideo === 'string' && saved.heroVideo && !/\.(mp4|webm|mov)(\?|#|$)/i.test(saved.heroVideo)){
+          out.heroVideo = saved.heroVideo;
+        }
         if (saved.admin && typeof saved.admin === 'object'){
           if (saved.admin.user) out.admin.user = saved.admin.user;
           if (saved.admin.pass) out.admin.pass = saved.admin.pass;
@@ -1154,49 +1136,62 @@ function syncScrollLock(){
 }
 
 /* =========================================================
-   FONDO — imagen fija con comprobación de carga:
-   ✓ si existe  /  ✗ si falta (con instrucción en el panel)
+   FONDO — detección inteligente:
+   1. Si el dueño configuró una URL de imagen, se usa esa.
+   2. Si no, prueba fondo.jpg → fondo.jpeg → fondo.png →
+      fondo.webp (y variantes con mayúscula) hasta que una cargue.
 ========================================================= */
 var bgStatus = { state:'idle', msg:'Comprobando fondo…' };
+var bgCurrentSrc = '';
 
-function applyHeroBg(){
-  var el = $('#bgImg');
-  if (!el) return;
-  var src = (state.heroVideo || '').trim() || DEFAULT_BG;
-
-  /* Solo imágenes: si ponen un .mp4, se avisa */
-  if (/\.(mp4|webm|mov)(\?|#|$)/i.test(src)){
-    bgStatus.state = 'error';
-    bgStatus.msg = '✗ Los videos ya no se usan de fondo. Usa una imagen (.jpg/.png/.webp/.gif).';
-    updateDrawerBgStatus();
-    el.style.backgroundImage = '';
-    return;
-  }
-
-  if (el.dataset.src === src) return;
-  el.dataset.src = src;
-  el.style.backgroundImage = 'url("' + src.replace(/"/g, '%22') + '")';
-
-  /* Comprobar que la imagen existe realmente */
-  var probe = new Image();
-  probe.onload = function(){
-    bgStatus.state = 'ok';
-    bgStatus.msg = '✓ Fondo cargado: ' + src;
-    updateDrawerBgStatus();
-  };
-  probe.onerror = function(){
-    bgStatus.state = 'error';
-    bgStatus.msg = '✗ No se encontró "' + src + '" en tu repositorio. Súbela como fondo.jpg (Add file → Upload files).';
-    updateDrawerBgStatus();
-    el.style.backgroundImage = '';
-  };
-  probe.src = src;
+function isImageSrc(src){
+  return /\.(jpg|jpeg|png|webp|gif|avif|svg)(\?|#|$)/i.test(src);
 }
 function updateDrawerBgStatus(){
   var el = $('#edBgStatus');
   if (!el) return;
   el.className = 'ed-empty ' + (bgStatus.state === 'ok' ? 'ed-ok' : bgStatus.state === 'error' ? 'ed-bad' : '');
   el.textContent = bgStatus.msg;
+}
+function applyHeroBg(){
+  var el = $('#bgImg');
+  if (!el) return;
+  var configured = (state.heroVideo || '').trim();
+
+  var candidates = [];
+  if (configured && isImageSrc(configured)){
+    candidates.push(configured); /* el que escribió el dueño tiene prioridad */
+  } else if (configured && !/\.(mp4|webm|mov)(\?|#|$)/i.test(configured)){
+    candidates.push(configured);
+  }
+  for (var i = 0; i < BG_CANDIDATES.length; i++){
+    if (candidates.indexOf(BG_CANDIDATES[i]) === -1) candidates.push(BG_CANDIDATES[i]);
+  }
+
+  var idx = 0;
+  function tryNext(){
+    if (idx >= candidates.length){
+      bgStatus.state = 'error';
+      bgStatus.msg = '✗ No encontré fondo.jpg / fondo.png / fondo.webp en tu repositorio. Verifica en GitHub: el archivo debe estar junto a index.html y escribirse igual (GitHub distingue mayúsculas).';
+      updateDrawerBgStatus();
+      el.style.backgroundImage = '';
+      bgCurrentSrc = '';
+      return;
+    }
+    var src = candidates[idx++];
+    var probe = new Image();
+    probe.onload = function(){
+      bgCurrentSrc = src;
+      el.dataset.src = src;
+      el.style.backgroundImage = 'url("' + src.replace(/"/g, '%22') + '")';
+      bgStatus.state = 'ok';
+      bgStatus.msg = '✓ Fondo cargado correctamente: ' + src;
+      updateDrawerBgStatus();
+    };
+    probe.onerror = tryNext;
+    probe.src = src;
+  }
+  tryNext();
 }
 
 /* ============ Tema ============ */
@@ -1253,7 +1248,7 @@ document.addEventListener('click', function(e){
     closeAdminMenu();
     toast('Configura el enlace de Sitio web 2 desde el icono de ojo.');
   } else {
-    closeAdminMenu(); /* el href real ya apunta al enlace */
+    closeAdminMenu();
   }
 });
  $('#eyeBtn').onclick = function(){
@@ -1345,7 +1340,6 @@ function openPlatModal(p){
   var actions = $('#pmActions');
   if (url){
     actions.innerHTML = '';
-    /* Enlace REAL: un toque del usuario y abre cualquier navegador */
     var a = document.createElement('a');
     a.className = 'pm-visit';
     a.href = url;
@@ -1503,7 +1497,6 @@ function render(){
       ? 'Actualizado el ' + new Date(state.updatedAt).toLocaleDateString('es-ES', { day:'2-digit', month:'2-digit', year:'numeric' })
       : 'En línea';
 
-    /* El href REAL de Sitio web 2 */
     var s2url = ((state.sys2 && state.sys2.url) || '').trim();
     var amOther = $('#amOther');
     if (s2url){
@@ -1917,7 +1910,6 @@ function applySave(){
   render();
   return true;
 }
-/* Guardar = publicar automáticamente cuando la nube está configurada */
  $('#edPublish').onclick = function(){
   if (applySave()){
     closeDrawer();
