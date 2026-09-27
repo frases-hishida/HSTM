@@ -6,7 +6,7 @@
 <meta name="theme-color" content="#0A0A0B">
 <title>Hishida — Frases</title>
 <script>try{document.documentElement.dataset.theme=localStorage.getItem('fh.theme')||'dark'}catch(e){}</script>
-<!-- DATOS PUBLICADOS (opcional): si algún día subes datos.js a GitHub, se carga aquí -->
+<!-- Respaldo opcional: datos.js en GitHub (si existe) -->
 <script src="datos.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -23,6 +23,7 @@
     --press:rgba(0,0,0,.26);
     --press-2:rgba(0,0,0,.40);
     --press-line:rgba(245,245,242,.28);
+    --scrim:linear-gradient(180deg, rgba(10,10,11,.88) 0%, rgba(10,10,11,.55) 32%, rgba(10,10,11,.6) 62%, rgba(10,10,11,.94) 100%);
   }
   :root[data-theme="light"]{
     --bg:#FAFAF8; --bg-soft:rgba(250,250,248,.72);
@@ -35,6 +36,7 @@
     --press:rgba(226,72,58,.10);
     --press-2:rgba(226,72,58,.20);
     --press-line:rgba(226,72,58,.42);
+    --scrim:linear-gradient(180deg, rgba(250,250,248,.8) 0%, rgba(250,250,248,.38) 32%, rgba(250,250,248,.45) 62%, rgba(250,250,248,.85) 100%);
   }
   *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
   html{scroll-behavior:smooth;scroll-padding-top:90px}
@@ -43,6 +45,16 @@
     font-family:'Manrope',sans-serif;line-height:1.5;
     -webkit-font-smoothing:antialiased;overflow-x:clip;
     transition:background-color .5s ease,color .5s ease;
+  }
+  /* Fondo con video en bucle, sin sonido, cubriendo toda la página */
+  .bgvideo{
+    position:fixed;inset:0;width:100%;height:100%;
+    object-fit:cover;z-index:-2;pointer-events:none;background:var(--bg);
+  }
+  /* Velo adaptable: mantiene la legibilidad del texto sobre el video */
+  .bgscrim{
+    position:fixed;inset:0;z-index:-1;pointer-events:none;
+    background:var(--scrim);
   }
   ::selection{background:var(--fg);color:var(--bg)}
   :focus-visible{outline:2px solid var(--fg);outline-offset:3px;border-radius:4px}
@@ -138,12 +150,18 @@
     font-size:clamp(15px,2vw,19px);letter-spacing:.26em;text-transform:uppercase;
     color:var(--mut);
   }
-  .hero h1{margin-top:12px;font-weight:650;letter-spacing:-.035em;line-height:1.02;font-size:clamp(36px,6.5vw,72px)}
+  .hero h1{
+    margin-top:12px;font-weight:650;letter-spacing:-.035em;line-height:1.02;
+    font-size:clamp(36px,6.5vw,72px);
+    text-shadow:0 2px 24px rgba(0,0,0,.25);
+  }
+  :root[data-theme="light"] .hero h1{text-shadow:0 2px 24px rgba(255,255,255,.5)}
   .tagline{margin-top:12px;color:var(--mut);font-size:15.5px;max-width:52ch}
   .chip{
     display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:999px;
     padding:6px 13px;font-family:'Space Grotesk';font-size:10px;font-weight:600;
     letter-spacing:.1em;text-transform:uppercase;color:var(--mut);
+    background:transparent;
   }
   .chip.online .pulse{
     width:6px;height:6px;border-radius:50%;flex:none;
@@ -270,7 +288,7 @@
   }
   #authOverlay.open .modal,#pubOverlay.open .modal{transform:none}
 
-  /* ---------- Ventana de publicación manual (respaldo) ---------- */
+  /* ---------- Publicación manual (respaldo) ---------- */
   .pub-code{
     width:100%;min-height:110px;max-height:180px;resize:vertical;
     background:var(--soft);border:1px solid var(--line);border-radius:12px;
@@ -413,7 +431,12 @@
   .gp svg{width:16px;height:16px}
   .gp:hover,.gp:active{background:var(--press);border-color:var(--press-line)}
   .gp.sel{background:var(--press);border-color:var(--fg)}
-  .ed-empty{color:var(--mut);font-size:13px;padding:12px 2px;line-height:1.6}
+  .ed-empty{color:var(--mut);font-size:13px;padding:6px 2px;line-height:1.6}
+  .ed-cloudid{
+    width:100%;background:var(--soft);border:1px dashed var(--hair);border-radius:11px;
+    padding:10px 12px;font-family:monospace;font-size:12px;color:var(--fg);
+    outline:none;word-break:break-all;
+  }
 
   /* ---------- Toast ---------- */
   .toast{
@@ -424,7 +447,7 @@
   }
   .toast.show{opacity:1;transform:translate(-50%,0)}
 
-  /* ---------- Aparición: 100% CSS, nunca depende de JavaScript ---------- */
+  /* ---------- Aparición: 100% CSS ---------- */
   .rv{
     animation:rise .7s cubic-bezier(.22,.8,.24,1) both;
     animation-delay:var(--d,0s);
@@ -457,6 +480,10 @@
 </style>
 </head>
 <body>
+
+<!-- Fondo con video en bucle, sin sonido -->
+<video class="bgvideo" id="bgVideo" muted loop playsinline preload="auto" autoplay></video>
+<div class="bgscrim"></div>
 
 <nav class="nav">
   <div class="nav-in">
@@ -542,7 +569,7 @@
 
   <footer>
     <span class="mini">© <span id="footYear"></span> · <span id="footOwner"></span></span>
-    <span class="mini">frases_hishida · v15</span>
+    <span class="mini">frases_hishida · v16</span>
   </footer>
 
 </main>
@@ -565,17 +592,17 @@
   </div>
 </div>
 
-<!-- ===== Publicación manual (respaldo si no hay Bin ID) ===== -->
+<!-- ===== Publicación manual (respaldo) ===== -->
 <div class="overlay" id="pubOverlay">
   <div class="modal" role="dialog" aria-modal="true" aria-labelledby="pubTitle">
     <div class="modal-head">
-      <span class="kicker">Publicación manual</span>
+      <span class="kicker">Publicación manual (respaldo)</span>
       <button class="icon-btn sm" id="pubClose" aria-label="Cerrar">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
       </button>
     </div>
     <h3 id="pubTitle">Método respaldo: datos.js</h3>
-    <p class="modal-sub">Para publicar AUTOMÁTICAMENTE, configura JSONBin (sección "Publicación automática" del panel). Este método manual es el respaldo.</p>
+    <p class="modal-sub">Para publicar AUTOMÁTICAMENTE, crea tu nube en el panel (sección "Nube de publicación"). Este método manual es el respaldo.</p>
     <textarea class="pub-code" id="pubCode" readonly spellcheck="false"></textarea>
     <button type="button" class="btn primary full" id="pubCopy">Copiar código</button>
     <ol class="pub-steps">
@@ -660,6 +687,16 @@
     </section>
 
     <section class="ed-sec">
+      <span class="ed-title">Video de fondo (bucle, sin sonido)</span>
+      <div class="ed-stack" style="margin-top:12px">
+        <label class="field"><span>Archivo o URL del video</span>
+          <input class="input" id="edHeroVideo" placeholder="fondo.mp4  ·o·  https://…/video.mp4">
+        </label>
+        <p class="ed-empty">Sube tu video a la raíz de tu repositorio de GitHub con el nombre <b>fondo.mp4</b>, o pega la URL de un .mp4. Se reproduce en bucle y sin sonido.</p>
+      </div>
+    </section>
+
+    <section class="ed-sec">
       <span class="ed-title">Sitio web 2 · Enlace del menú</span>
       <div class="ed-stack" style="margin-top:12px">
         <label class="field"><span>Enlace (URL)</span><input class="input" id="edSys2Url" placeholder="https://…"></label>
@@ -667,12 +704,15 @@
     </section>
 
     <section class="ed-sec">
-      <span class="ed-title">Publicación automática (JSONBin)</span>
+      <span class="ed-title">Nube de publicación (automática)</span>
       <div class="ed-stack" style="margin-top:12px">
-        <label class="field"><span>Tu clave secreta (X-Master-Key de jsonbin.io)</span>
-          <input class="input" id="edPubKey" type="password" autocomplete="off" placeholder="Pégala aquí (solo se guarda en tu teléfono)">
-        </label>
-        <span class="ed-empty" id="edPubStatus"></span>
+        <span class="ed-empty" id="edCloudStatus"></span>
+        <input class="ed-cloudid" id="edCloudId" readonly spellcheck="false" hidden>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button type="button" class="add-btn" id="edCloudCreate">Crear mi nube gratis</button>
+          <button type="button" class="add-btn" id="edCloudCopy" hidden>Copiar ID</button>
+        </div>
+        <p class="ed-empty" id="edCloudHelp"></p>
       </div>
     </section>
 
@@ -687,11 +727,10 @@
   </div>
 
   <footer class="drawer-foot">
-    <span class="mini">«Guardar» = vista previa local. «Publicar» = envía los cambios a todos los visitantes.</span>
+    <span class="mini">Con la nube creada, «Guardar» publica automáticamente para todos.</span>
     <div class="drawer-foot-btns">
       <button class="btn ghost" id="edDiscard">Descartar</button>
-      <button class="btn ghost" id="edSave">Guardar</button>
-      <button class="btn primary" id="edPublish">Publicar</button>
+      <button class="btn primary" id="edPublish">Guardar y publicar</button>
     </div>
   </footer>
 </aside>
@@ -700,13 +739,10 @@
 
 <script>
 /* =========================================================
-   PUBLICACIÓN AUTOMÁTICA — CONFIGURA AQUÍ (una sola vez)
-   1. Crea cuenta gratis en jsonbin.io
-   2. Create Bin → copia el "Bin ID"
-   3. Pégalo abajo entre las comillas y sube este archivo a GitHub
-   4. Tu X-Master-Key se pega después desde el panel del sitio
+   NUBE DE PUBLICACIÓN — CONFIGURACIÓN (una sola vez)
+   Tras crear tu nube desde el panel, pega aquí el ID:
 ========================================================= */
-var JSONBIN_BIN_ID = ''; /* ← PEGA AQUÍ TU BIN ID, ejemplo: '65a1b2c3d4e5f67890123456' */
+var CLOUD_ID = ''; /* ← PEGA AQUÍ TU ID DE NUBE, ejemplo: '9f3a2b7c-84d1-4e5f-9a0b-1c2d3e4f5a6b' */
 
 /* ============ Utilidades ============ */
 function $(s){ return document.querySelector(s); }
@@ -750,51 +786,13 @@ function copyRaw(t, msg){
 function copyText(t){ copyRaw(t, 'Copiado: ' + t); }
 
 /* =========================================================
-   REDIRECCIÓN DIRECTA — sin "copiar enlace"
+   REDIRECCIÓN DIRECTA — sin "copiar enlace".
+   Navegación en la misma pestaña: funciona en cualquier
+   navegador, incluidos los visores internos de TikTok,
+   Instagram, WhatsApp y Facebook.
 ========================================================= */
-var UA = (navigator.userAgent || '').toLowerCase();
-var IS_ANDROID = UA.indexOf('android') > -1;
-var APP_SCHEMES = {
-  tiktok:    'snssdk1233://',
-  instagram: 'instagram://',
-  facebook:  'fb://',
-  whatsapp:  'whatsapp://',
-  youtube:   'vnd.youtube://'
-};
-function detectBrand(url){
-  var u = (url || '').toLowerCase();
-  if (u.indexOf('tiktok') > -1) return 'tiktok';
-  if (u.indexOf('instagram') > -1) return 'instagram';
-  if (u.indexOf('facebook') > -1 || u.indexOf('fb.com') > -1) return 'facebook';
-  if (u.indexOf('whatsapp') > -1) return 'whatsapp';
-  if (u.indexOf('youtube') > -1 || u.indexOf('youtu.be') > -1) return 'youtube';
-  return null;
-}
 function navigateTo(url){
-  if (!IS_ANDROID){
-    window.location.href = url;
-    return;
-  }
-  var brand = detectBrand(url);
-  var scheme = brand ? APP_SCHEMES[brand] : null;
-  if (scheme){
-    var left = false;
-    function onLeave(){ left = true; }
-    document.addEventListener('visibilitychange', onLeave, { once:true });
-    window.addEventListener('pagehide', onLeave, { once:true });
-    var ifr = document.createElement('iframe');
-    ifr.style.cssText = 'position:fixed;width:0;height:0;border:0;opacity:0';
-    ifr.src = scheme;
-    document.body.appendChild(ifr);
-    setTimeout(function(){ ifr.remove(); }, 1200);
-    setTimeout(function(){
-      if (!left && !document.hidden){
-        window.location.href = url;
-      }
-    }, 1200);
-  } else {
-    window.location.href = url;
-  }
+  window.location.href = url;
 }
 
 /* ============ ICONOS OFICIALES CON COLOR DE MARCA ============ */
@@ -856,59 +854,42 @@ var ICON = {
   moon: '<path d="M20 13.6A8 8 0 1 1 10.4 4 6.4 6.4 0 0 0 20 13.6z"/>'
 };
 
-/* ============ Estado base ============
-   Prioridad: SEED → datos.js → caché de lo publicado → ajustes locales del dueño */
-var LS_KEY = 'fh.kit.v10';
-var PUB_CACHE_KEY = 'fh.pubcache.v1';
-var PUBKEY_KEY = 'fh.jsonbin.key';
+/* ============ Estado base — TUS DATOS REALES ============ */
+var LS_KEY = 'fh.kit.v11';
+var LS_CLOUD = 'fh.cloudid.v1';
+var DEFAULT_VIDEO = 'fondo.mp4';
 
 var SEED = {
   admin: { user:'frases_hishida', pass:null },
   sys2:  { name:'Sitio web 2', url:'https://frases-hishida.github.io/fsapp/' },
+  heroVideo: DEFAULT_VIDEO,
   owner: 'Hishida',
   tagline: 'Frases para sentir, pensar y compartir. Mías y de quienes pasan por aquí.',
   updatedAt: null,
-  phrases: [
-    { id:'q1', text:'Lo que callas con el mundo, dilo en una frase.', tag:'Íntimo', by:'admin', author:'' },
-    { id:'q2', text:'No llegas tarde a tu vida: llegas exactamente a ti.', tag:'Tiempo', by:'admin', author:'' },
-    { id:'q3', text:'Hay despedidas que son comienzos con mejor disfraz.', tag:'Adiós', by:'admin', author:'' },
-    { id:'q4', text:'Ser suave también es una forma de ser fuerte.', tag:'Calma', by:'admin', author:'' }
-  ],
+  phrases: [],
   platforms: [
-    { id:'p1', name:'TikTok',    handle:'@frases_hishida',          count:0, url:'https://www.tiktok.com/@frases_hishida',           label:'seguidores',   glyph:'tiktok',    bg:'', desc:'' },
-    { id:'p2', name:'Instagram', handle:'@fraseshishida',           count:0, url:'https://www.instagram.com/fraseshishida/',         label:'seguidores',   glyph:'instagram', bg:'', desc:'' },
-    { id:'p3', name:'Facebook',  handle:'Hishida099',               count:0, url:'https://www.facebook.com/Hishida099',              label:'seguidores',   glyph:'facebook',  bg:'', desc:'' },
-    { id:'p4', name:'YouTube',   handle:'@Frases_hishida',          count:0, url:'https://www.youtube.com/@Frases_hishida',          label:'suscriptores', glyph:'youtube',   bg:'', desc:'' },
-    { id:'p5', name:'Grupo de WhatsApp', handle:'Comunidad Frases y más..', count:0, url:'https://chat.whatsapp.com/CzVStek9Td92bgusVeX8xk', label:'miembros', glyph:'whatsapp', bg:'', desc:'' }
+    { id:'p1', name:'TikTok',    handle:'@frases_hishida',          count:24000, url:'https://www.tiktok.com/@frases_hishida',           label:'seguidores',   glyph:'tiktok',    bg:'', desc:'' },
+    { id:'p2', name:'Instagram', handle:'@fraseshishida',           count:27,    url:'https://www.instagram.com/fraseshishida/',         label:'seguidores',   glyph:'instagram', bg:'', desc:'' },
+    { id:'p3', name:'Facebook',  handle:'Hishida099',               count:11000, url:'https://www.facebook.com/Hishida099',              label:'seguidores',   glyph:'facebook',  bg:'', desc:'' },
+    { id:'p4', name:'YouTube',   handle:'@Frases_hishida',          count:567,   url:'https://www.youtube.com/@Frases_hishida',          label:'suscriptores', glyph:'youtube',   bg:'', desc:'' },
+    { id:'p5', name:'Grupo de WhatsApp', handle:'Comunidad Frases y más..', count:51, url:'https://chat.whatsapp.com/CzVStek9Td92bgusVeX8xk', label:'miembros', glyph:'whatsapp', bg:'', desc:'' }
   ]
 };
-
-/* Si el Bin ID viene dentro de datos.js, también se acepta */
-if (window.DATOS_PUBLICOS && window.DATOS_PUBLICOS.binId && !JSONBIN_BIN_ID){
-  JSONBIN_BIN_ID = String(window.DATOS_PUBLICOS.binId);
-}
 
 var BASE = clone(SEED);
 function mergePublic(rec){
   if (!rec || typeof rec !== 'object') return;
   if (typeof rec.owner === 'string' && rec.owner) BASE.owner = rec.owner;
   if (typeof rec.tagline === 'string') BASE.tagline = rec.tagline;
-  if (isArr(rec.phrases) && rec.phrases.length) BASE.phrases = rec.phrases;
+  if (typeof rec.heroVideo === 'string') BASE.heroVideo = rec.heroVideo;
+  if (isArr(rec.phrases)) BASE.phrases = rec.phrases;
   if (isArr(rec.platforms) && rec.platforms.length) BASE.platforms = rec.platforms;
   if (rec.sys2 && typeof rec.sys2.url === 'string') BASE.sys2.url = rec.sys2.url;
   if (rec.updatedAt) BASE.updatedAt = rec.updatedAt;
 }
-/* 1. datos.js (si existe) */
 if (window.DATOS_PUBLICOS && typeof window.DATOS_PUBLICOS === 'object'){
   mergePublic(window.DATOS_PUBLICOS);
 }
-/* 2. caché local de lo publicado (evita ver datos viejos mientras carga) */
-(function(){
-  try {
-    var c = localStorage.getItem(PUB_CACHE_KEY);
-    if (c) mergePublic(JSON.parse(c));
-  } catch(e){}
-})();
 
 var KNOWN_BRANDS = ['facebook','youtube','whatsapp','instagram','tiktok'];
 var NAME_TO_BRAND = [
@@ -944,6 +925,7 @@ function load(){
       if (saved && typeof saved === 'object'){
         if (typeof saved.owner === 'string' && saved.owner) out.owner = saved.owner;
         if (typeof saved.tagline === 'string') out.tagline = saved.tagline;
+        if (typeof saved.heroVideo === 'string') out.heroVideo = saved.heroVideo;
         if (saved.admin && typeof saved.admin === 'object'){
           if (saved.admin.user) out.admin.user = saved.admin.user;
           if (saved.admin.pass) out.admin.pass = saved.admin.pass;
@@ -951,7 +933,7 @@ function load(){
         if (saved.sys2 && typeof saved.sys2 === 'object'){
           out.sys2.url = typeof saved.sys2.url === 'string' ? saved.sys2.url : out.sys2.url;
         }
-        if (isArr(saved.phrases) && saved.phrases.length) out.phrases = saved.phrases;
+        if (isArr(saved.phrases)) out.phrases = saved.phrases;
         if (isArr(saved.platforms) && saved.platforms.length) out.platforms = saved.platforms;
         if (saved.updatedAt) out.updatedAt = saved.updatedAt;
       }
@@ -969,41 +951,41 @@ for (var _i = 0; _i < state.phrases.length; _i++){
 autoFixGlyphs(state.platforms);
 
 /* =========================================================
-   JSONBIN: leer (todos) y escribir (solo tú)
+   NUBE DE PUBLICACIÓN (jsonblob.com — sin cuenta, sin claves)
 ========================================================= */
-function getMasterKey(){
-  try { return localStorage.getItem(PUBKEY_KEY) || ''; } catch(e){ return ''; }
+function htmlCloudId(){
+  return (typeof CLOUD_ID === 'string' ? CLOUD_ID : '').trim();
 }
-function setMasterKey(k){
-  try { localStorage.setItem(PUBKEY_KEY, k); } catch(e){}
+function localCloudId(){
+  try { return localStorage.getItem(LS_CLOUD) || ''; } catch(e){ return ''; }
 }
-function fetchPublished(cb){
-  if (!JSONBIN_BIN_ID){ cb(null); return; }
-  var done = false;
+function effCloudId(){
+  return htmlCloudId() || localCloudId();
+}
+function setLocalCloudId(id){
+  try { localStorage.setItem(LS_CLOUD, id); } catch(e){}
+}
+function createCloud(cb){
   var x = new XMLHttpRequest();
-  x.open('GET', 'https://api.jsonbin.io/v3/b/' + JSONBIN_BIN_ID + '/latest?_=' + Date.now(), true);
-  x.timeout = 8000;
+  x.open('POST', 'https://jsonblob.com/api/jsonBlob', true);
+  x.setRequestHeader('Content-Type', 'application/json');
+  x.setRequestHeader('Accept', 'application/json');
+  x.timeout = 10000;
   x.onload = function(){
-    if (done) return; done = true;
     try {
-      var j = JSON.parse(x.responseText);
-      cb(j && j.record ? j.record : null);
-    } catch(e){ cb(null); }
-  };
-  x.onerror = x.ontimeout = function(){
-    if (done) return; done = true;
+      var loc = x.getResponseHeader('Location') || '';
+      var m = loc.match(/([0-9a-fA-F-]{16,})\s*$/);
+      if (x.status >= 200 && x.status < 300 && m){ cb(m[1]); return; }
+    } catch(e){}
     cb(null);
   };
-  x.send();
+  x.onerror = x.ontimeout = function(){ cb(null); };
+  x.send(JSON.stringify(buildPublicRecord()));
 }
-function pushPublished(record, ok, fail){
-  var key = getMasterKey();
-  if (!JSONBIN_BIN_ID || !key){ fail('sin configurar'); return; }
+function putCloud(id, rec, ok, fail){
   var x = new XMLHttpRequest();
-  x.open('PUT', 'https://api.jsonbin.io/v3/b/' + JSONBIN_BIN_ID, true);
+  x.open('PUT', 'https://jsonblob.com/api/jsonBlob/' + id, true);
   x.setRequestHeader('Content-Type', 'application/json');
-  x.setRequestHeader('X-Master-Key', key);
-  x.setRequestHeader('X-Bin-Versioning', 'false');
   x.timeout = 10000;
   x.onload = function(){
     if (x.status >= 200 && x.status < 300) ok();
@@ -1011,13 +993,30 @@ function pushPublished(record, ok, fail){
   };
   x.onerror = function(){ fail('sin conexión'); };
   x.ontimeout = function(){ fail('sin conexión'); };
-  x.send(JSON.stringify(record));
+  x.send(JSON.stringify(rec));
 }
-/* Carga asíncrona de lo publicado: al llegar, actualiza lo que ven TODOS */
+function getCloud(id, cb){
+  var x = new XMLHttpRequest();
+  x.open('GET', 'https://jsonblob.com/api/jsonBlob/' + id + '?_=' + Date.now(), true);
+  x.timeout = 8000;
+  x.onload = function(){
+    try {
+      if (x.status >= 200 && x.status < 300){
+        cb(JSON.parse(x.responseText));
+        return;
+      }
+    } catch(e){}
+    cb(null);
+  };
+  x.onerror = x.ontimeout = function(){ cb(null); };
+  x.send();
+}
+/* Los visitantes cargan lo publicado en segundo plano */
 function refreshFromPublished(){
-  fetchPublished(function(rec){
-    if (!rec) return;
-    try { localStorage.setItem(PUB_CACHE_KEY, JSON.stringify(rec)); } catch(e){}
+  var id = effCloudId();
+  if (!id) return;
+  getCloud(id, function(rec){
+    if (!rec || typeof rec !== 'object') return;
     mergePublic(rec);
     state = load();
     if (!isArr(state.phrases)) state.phrases = clone(SEED.phrases);
@@ -1044,6 +1043,31 @@ function syncScrollLock(){
     || platOverlay.classList.contains('open')
     || pubOverlay.classList.contains('open');
   document.body.style.overflow = open ? 'hidden' : '';
+}
+
+/* ============ Fondo con video ============ */
+function applyHeroVideo(){
+  var v = $('#bgVideo');
+  if (!v) return;
+  var src = (state.heroVideo || '').trim() || DEFAULT_VIDEO;
+  if (v.dataset.src === src) return;
+  v.dataset.src = src;
+  while (v.firstChild) v.removeChild(v.firstChild);
+  var s = document.createElement('source');
+  s.src = src;
+  s.type = 'video/mp4';
+  v.appendChild(s);
+  v.muted = true;
+  v.loop = true;
+  try { v.setAttribute('playsinline',''); v.setAttribute('webkit-playsinline',''); } catch(e){}
+  if (reduced){
+    /* Con movimiento reducido: solo el primer fotograma */
+    v.pause();
+    v.addEventListener('loadeddata', function(){ try{ v.currentTime = 0; }catch(e){} }, { once:true });
+  } else {
+    var p = v.play();
+    if (p && p.catch) p.catch(function(){ /* Autoplay bloqueado: el usuario puede recargar */ });
+  }
 }
 
 /* ============ Tema ============ */
@@ -1073,7 +1097,7 @@ function toast(msg){
   t.textContent = msg;
   t.classList.add('show');
   clearTimeout(toastTimer);
-  toastTimer = setTimeout(function(){ t.classList.remove('show'); }, 3000);
+  toastTimer = setTimeout(function(){ t.classList.remove('show'); }, 3200);
 }
 
 /* ============ Menú de sitios ============ */
@@ -1109,9 +1133,9 @@ document.addEventListener('click', function(e){
 /* ============ Publicación ============ */
 function buildPublicRecord(){
   return {
-    binId: JSONBIN_BIN_ID || undefined,
     owner: state.owner,
     tagline: state.tagline,
+    heroVideo: (state.heroVideo || '').trim() || DEFAULT_VIDEO,
     updatedAt: Date.now(),
     phrases: state.phrases,
     platforms: state.platforms.map(function(p){
@@ -1144,23 +1168,19 @@ pubOverlay.addEventListener('click', function(e){
   setTimeout(function(){ ta.select(); }, 10);
 });
 
-function tryPublish(){
-  if (!JSONBIN_BIN_ID){
-    openPub(); /* respaldo manual */
-    return;
-  }
-  var key = getMasterKey();
-  if (!key){
-    toast('Primero pega tu Master Key en el panel (Publicación automática).');
-    openDrawer();
+/* Publicación automática: Guardar → nube. Si falla, ofrece el manual. */
+function publishCloud(){
+  var id = effCloudId();
+  if (!id){
+    toast('Primero crea tu nube en el panel (Nube de publicación).');
+    openPub();
     return;
   }
   toast('Publicando…');
-  pushPublished(buildPublicRecord(), function(){
-    toast('¡Publicado! Todos los visitantes verán los cambios en segundos.');
-    try { localStorage.setItem(PUB_CACHE_KEY, JSON.stringify(buildPublicRecord())); } catch(e){}
+  putCloud(id, buildPublicRecord(), function(){
+    toast('¡Publicado! Todos los visitantes lo ven al instante.');
   }, function(err){
-    toast('No se pudo publicar (' + err + '). Abre el método manual.');
+    toast('No se pudo publicar (' + err + '). Abriendo método manual.');
     openPub();
   });
 }
@@ -1359,6 +1379,7 @@ function render(){
       $('#pgrid').innerHTML = sorted.map(cardHTML).join('');
     }
 
+    applyHeroVideo();
     renderQuote();
     requestAnimationFrame(runCounters);
   } catch(err){
@@ -1479,22 +1500,68 @@ authOverlay.addEventListener('click', function(e){
 
 /* ============ Panel del propietario ============ */
 var draft = null;
-function pubStatusText(){
-  if (!JSONBIN_BIN_ID) return 'Falta el Bin ID: pégalo en el HTML (línea JSONBIN_BIN_ID) y súbelo a GitHub. Mientras tanto funciona el método manual.';
-  if (!getMasterKey()) return 'Pega tu X-Master-Key de jsonbin.io aquí y guarda. Después, Publicar enviará todo automáticamente.';
-  return 'Lista: el botón Publicar envía los cambios a todos los visitantes automáticamente.';
+
+function updateCloudUI(){
+  var htmlId = htmlCloudId();
+  var localId = localCloudId();
+  var st = $('#edCloudStatus');
+  var inp = $('#edCloudId');
+  var btnCreate = $('#edCloudCreate');
+  var btnCopy = $('#edCloudCopy');
+  var help = $('#edCloudHelp');
+  if (htmlId){
+    st.textContent = '✓ Automático activo. Cada vez que Guardes, todo se publica al instante para todos.';
+    inp.hidden = true;
+    btnCreate.hidden = true;
+    btnCopy.hidden = true;
+    help.textContent = '';
+  } else if (localId){
+    st.textContent = 'Tu nube está creada. Último paso (una sola vez):';
+    inp.hidden = false;
+    inp.value = localId;
+    btnCreate.hidden = true;
+    btnCopy.hidden = false;
+    help.innerHTML = 'Copia el ID y pégalo en tu index.html, en la línea <b>CLOUD_ID = \'\';</b> (búscala cerca del inicio del script). Luego sube el archivo a GitHub. Desde entonces, Guardar publicará automáticamente.';
+  } else {
+    st.textContent = 'Sin nube todavía. Toca «Crear mi nube gratis» — no necesita cuenta ni claves.';
+    inp.hidden = true;
+    btnCreate.hidden = false;
+    btnCopy.hidden = true;
+    help.textContent = '';
+  }
 }
+ $('#edCloudCreate').onclick = function(){
+  var b = this;
+  b.disabled = true;
+  b.textContent = 'Creando…';
+  createCloud(function(id){
+    b.disabled = false;
+    b.textContent = 'Crear mi nube gratis';
+    if (id){
+      setLocalCloudId(id);
+      updateCloudUI();
+      toast('¡Nube creada! Copia el ID y pégalo en el HTML (una sola vez).');
+    } else {
+      toast('No se pudo crear la nube. Revisa tu conexión e inténtalo de nuevo.');
+    }
+  });
+};
+ $('#edCloudCopy').onclick = function(){
+  var id = localCloudId();
+  if (id) copyRaw(id, 'ID copiado. Pégalo en el HTML en CLOUD_ID.');
+};
+
 function openDrawer(){
   if (!unlocked){ openAuth(); return; }
   draft = clone(state);
   $('#edOwner').value = draft.owner || '';
   $('#edTagline').value = draft.tagline || '';
+  $('#edHeroVideo').value = (draft.heroVideo || '').trim() || DEFAULT_VIDEO;
   $('#edSys2Url').value  = (draft.sys2 && draft.sys2.url)  || '';
   $('#edAdminUser').value = draft.admin.user || '';
-  $('#edPubKey').value = '';
   $('#edNewPass').value = '';
   $('#edNewPass2').value = '';
-  $('#edPubStatus').textContent = pubStatusText();
+  updateCloudUI();
   renderEdQuotes();
   renderEdPlats();
   drawerEl.classList.add('open');
@@ -1662,6 +1729,7 @@ function applySave(){
     if (typeof p2.bg !== 'string') p2.bg = '';
     if (typeof p2.desc !== 'string') p2.desc = '';
   }
+  draft.heroVideo = $('#edHeroVideo').value.trim();
   draft.sys2 = { name: 'Sitio web 2', url: $('#edSys2Url').value.trim() };
   var nu = $('#edAdminUser').value.trim();
   if (nu){
@@ -1674,9 +1742,6 @@ function applySave(){
     if (n1 !== n2)    { toast('Las contraseñas nuevas no coinciden.'); return false; }
     draft.admin.pass = hashStr(n1);
   }
-  /* Clave de publicación automática: se guarda SOLO en este dispositivo */
-  var pk = $('#edPubKey').value.trim();
-  if (pk) setMasterKey(pk);
   draft.owner = $('#edOwner').value.trim();
   draft.tagline = $('#edTagline').value.trim();
   draft.updatedAt = Date.now();
@@ -1686,16 +1751,11 @@ function applySave(){
   render();
   return true;
 }
- $('#edSave').onclick = function(){
-  if (applySave()){
-    closeDrawer();
-    toast('Guardado (vista previa). Usa Publicar para que todos lo vean.');
-  }
-};
+/* Guardar = publicar automáticamente cuando la nube está configurada */
  $('#edPublish').onclick = function(){
   if (applySave()){
     closeDrawer();
-    tryPublish();
+    publishCloud();
   }
 };
  $('#edDiscard').onclick = closeDrawer;
@@ -1728,7 +1788,6 @@ addEventListener('keydown', function(e){
 /* ============ Inicio ============ */
 render();
 requestAnimationFrame(qLoop);
-/* Carga en segundo plano de lo publicado: todos los dispositivos ven lo último */
 refreshFromPublished();
 </script>
 </body>
