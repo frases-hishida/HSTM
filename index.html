@@ -46,12 +46,11 @@
     -webkit-font-smoothing:antialiased;overflow-x:clip;
     transition:background-color .5s ease,color .5s ease;
   }
-  /* Fondo con video en bucle, sin sonido, cubriendo toda la página */
+  /* Fondo con video en bucle, sin sonido */
   .bgvideo{
     position:fixed;inset:0;width:100%;height:100%;
     object-fit:cover;z-index:-2;pointer-events:none;background:var(--bg);
   }
-  /* Velo adaptable: mantiene la legibilidad del texto sobre el video */
   .bgscrim{
     position:fixed;inset:0;z-index:-1;pointer-events:none;
     background:var(--scrim);
@@ -136,6 +135,7 @@
     transition:background-color .25s,border-color .25s;
   }
   .add-btn:hover,.add-btn:active{background:var(--press);border-color:var(--press-line)}
+  .add-btn:disabled{opacity:.5;cursor:default}
   .ghost-btn{
     background:none;border:0;cursor:pointer;font-size:12px;font-weight:600;color:var(--mut);
     text-decoration:underline;text-underline-offset:3px;transition:color .2s;padding:2px 0;
@@ -288,7 +288,6 @@
   }
   #authOverlay.open .modal,#pubOverlay.open .modal{transform:none}
 
-  /* ---------- Publicación manual (respaldo) ---------- */
   .pub-code{
     width:100%;min-height:110px;max-height:180px;resize:vertical;
     background:var(--soft);border:1px solid var(--line);border-radius:12px;
@@ -432,6 +431,7 @@
   .gp:hover,.gp:active{background:var(--press);border-color:var(--press-line)}
   .gp.sel{background:var(--press);border-color:var(--fg)}
   .ed-empty{color:var(--mut);font-size:13px;padding:6px 2px;line-height:1.6}
+  .ed-empty b{color:var(--fg);font-weight:700}
   .ed-cloudid{
     width:100%;background:var(--soft);border:1px dashed var(--hair);border-radius:11px;
     padding:10px 12px;font-family:monospace;font-size:12px;color:var(--fg);
@@ -569,7 +569,7 @@
 
   <footer>
     <span class="mini">© <span id="footYear"></span> · <span id="footOwner"></span></span>
-    <span class="mini">frases_hishida · v16</span>
+    <span class="mini">frases_hishida · v17</span>
   </footer>
 
 </main>
@@ -703,7 +703,7 @@
       </div>
     </section>
 
-    <section class="ed-sec">
+    <section class="ed-sec" id="secCloud">
       <span class="ed-title">Nube de publicación (automática)</span>
       <div class="ed-stack" style="margin-top:12px">
         <span class="ed-empty" id="edCloudStatus"></span>
@@ -711,6 +711,7 @@
         <div style="display:flex;gap:8px;flex-wrap:wrap">
           <button type="button" class="add-btn" id="edCloudCreate">Crear mi nube gratis</button>
           <button type="button" class="add-btn" id="edCloudCopy" hidden>Copiar ID</button>
+          <button type="button" class="add-btn" id="edCloudTest" hidden>Probar</button>
         </div>
         <p class="ed-empty" id="edCloudHelp"></p>
       </div>
@@ -727,7 +728,7 @@
   </div>
 
   <footer class="drawer-foot">
-    <span class="mini">Con la nube creada, «Guardar» publica automáticamente para todos.</span>
+    <span class="mini">Con la nube activa, «Guardar y publicar» envía todo a los visitantes al instante.</span>
     <div class="drawer-foot-btns">
       <button class="btn ghost" id="edDiscard">Descartar</button>
       <button class="btn primary" id="edPublish">Guardar y publicar</button>
@@ -742,7 +743,7 @@
    NUBE DE PUBLICACIÓN — CONFIGURACIÓN (una sola vez)
    Tras crear tu nube desde el panel, pega aquí el ID:
 ========================================================= */
-var CLOUD_ID = ''; /* ← PEGA AQUÍ TU ID DE NUBE, ejemplo: '9f3a2b7c-84d1-4e5f-9a0b-1c2d3e4f5a6b' */
+var CLOUD_ID = ''; /* ← PEGA AQUÍ TU ID, ejemplo: 'kvdb:AbCdEf123456' o 'jsonblob:abc123...' */
 
 /* ============ Utilidades ============ */
 function $(s){ return document.querySelector(s); }
@@ -786,10 +787,7 @@ function copyRaw(t, msg){
 function copyText(t){ copyRaw(t, 'Copiado: ' + t); }
 
 /* =========================================================
-   REDIRECCIÓN DIRECTA — sin "copiar enlace".
-   Navegación en la misma pestaña: funciona en cualquier
-   navegador, incluidos los visores internos de TikTok,
-   Instagram, WhatsApp y Facebook.
+   REDIRECCIÓN DIRECTA — sin "copiar enlace"
 ========================================================= */
 function navigateTo(url){
   window.location.href = url;
@@ -951,71 +949,184 @@ for (var _i = 0; _i < state.phrases.length; _i++){
 autoFixGlyphs(state.platforms);
 
 /* =========================================================
-   NUBE DE PUBLICACIÓN (jsonblob.com — sin cuenta, sin claves)
+   NUBE DE PUBLICACIÓN CON 4 SERVICIOS EN CASCADA
+   Si uno falla o está bloqueado, prueba el siguiente.
 ========================================================= */
-function htmlCloudId(){
-  return (typeof CLOUD_ID === 'string' ? CLOUD_ID : '').trim();
+function xhrRaw(method, url, body, headers, ok, fail){
+  var x = new XMLHttpRequest();
+  x.open(method, url, true);
+  x.timeout = 9000;
+  if (headers){
+    for (var h in headers){ try { x.setRequestHeader(h, headers[h]); } catch(e){} }
+  }
+  x.onload = function(){
+    if (x.status >= 200 && x.status < 300) ok(x.responseText, x);
+    else fail('HTTP ' + x.status);
+  };
+  x.onerror = function(){ fail('sin conexión'); };
+  x.ontimeout = function(){ fail('tiempo agotado'); };
+  x.send(body || null);
 }
+
+var CLOUD_PROVIDERS = [
+  {
+    name: 'jsonblob',
+    label: 'JsonBlob',
+    create: function(rec, cb){
+      xhrRaw('POST', 'https://jsonblob.com/api/jsonBlob', JSON.stringify(rec),
+        {'Content-Type':'application/json','Accept':'application/json'},
+        function(txt, x){
+          var loc = '';
+          try { loc = x.getResponseHeader('Location') || ''; } catch(e){}
+          var m = loc.match(/([0-9a-fA-F-]{10,})\s*$/);
+          cb(m ? m[1] : null);
+        },
+        function(){ cb(null); });
+    },
+    put: function(id, rec, ok, fail){
+      xhrRaw('PUT', 'https://jsonblob.com/api/jsonBlob/' + id, JSON.stringify(rec),
+        {'Content-Type':'application/json'}, ok, fail);
+    },
+    get: function(id, cb){
+      xhrRaw('GET', 'https://jsonblob.com/api/jsonBlob/' + id, null, null,
+        function(txt){ try { cb(JSON.parse(txt)); } catch(e){ cb(null); } },
+        function(){ cb(null); });
+    }
+  },
+  {
+    name: 'kvdb',
+    label: 'KVDB',
+    create: function(rec, cb){
+      xhrRaw('POST', 'https://kvdb.io/', '{}', null,
+        function(txt){
+          var id = (txt || '').trim().replace(/"/g, '');
+          if (!id || id.length < 8){ cb(null); return; }
+          xhrRaw('PUT', 'https://kvdb.io/' + id + '/data', JSON.stringify(rec), null,
+            function(){ cb(id); },
+            function(){ cb(null); });
+        },
+        function(){ cb(null); });
+    },
+    put: function(id, rec, ok, fail){
+      xhrRaw('PUT', 'https://kvdb.io/' + id + '/data', JSON.stringify(rec), null, ok, fail);
+    },
+    get: function(id, cb){
+      xhrRaw('GET', 'https://kvdb.io/' + id + '/data', null, null,
+        function(txt){ try { cb(JSON.parse(txt)); } catch(e){ cb(null); } },
+        function(){ cb(null); });
+    }
+  },
+  {
+    name: 'jsonstorage',
+    label: 'JsonStorage',
+    create: function(rec, cb){
+      xhrRaw('POST', 'https://api.jsonstorage.net/v1/json', JSON.stringify(rec),
+        {'Content-Type':'application/json'},
+        function(txt){
+          try {
+            var j = JSON.parse(txt);
+            var uri = (j && j.uri) || '';
+            var m = uri.match(/([0-9a-fA-F-]{10,})\s*$/);
+            cb(m ? m[1] : null);
+          } catch(e){ cb(null); }
+        },
+        function(){ cb(null); });
+    },
+    put: function(id, rec, ok, fail){
+      xhrRaw('PUT', 'https://api.jsonstorage.net/v1/json/' + id, JSON.stringify(rec),
+        {'Content-Type':'application/json'}, ok, fail);
+    },
+    get: function(id, cb){
+      xhrRaw('GET', 'https://api.jsonstorage.net/v1/json/' + id, null, null,
+        function(txt){ try { cb(JSON.parse(txt)); } catch(e){ cb(null); } },
+        function(){ cb(null); });
+    }
+  },
+  {
+    name: 'textdb',
+    label: 'TextDB',
+    create: function(rec, cb){
+      var id = 'fh' + Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+      xhrRaw('GET', 'https://textdb.online/update/?id=' + encodeURIComponent(id)
+        + '&value=' + encodeURIComponent(JSON.stringify(rec)), null, null,
+        function(){ cb(id); },
+        function(){ cb(null); });
+    },
+    put: function(id, rec, ok, fail){
+      xhrRaw('GET', 'https://textdb.online/update/?id=' + encodeURIComponent(id)
+        + '&value=' + encodeURIComponent(JSON.stringify(rec)), null, null, ok, fail);
+    },
+    get: function(id, cb){
+      xhrRaw('GET', 'https://textdb.online/' + encodeURIComponent(id) + '/', null, null,
+        function(txt){
+          try {
+            var j = JSON.parse(txt);
+            var v = (j && j.value) || '';
+            cb(JSON.parse(v));
+          } catch(e){ cb(null); }
+        },
+        function(){ cb(null); });
+    }
+  }
+];
+
+function findProvider(name){
+  for (var i = 0; i < CLOUD_PROVIDERS.length; i++){
+    if (CLOUD_PROVIDERS[i].name === name) return CLOUD_PROVIDERS[i];
+  }
+  return null;
+}
+/* ID completo 'proveedor:id'; los ID antiguos sin prefijo eran jsonblob */
+function splitCloudId(full){
+  if (!full) return null;
+  var i = full.indexOf(':');
+  if (i < 0) return { name:'jsonblob', id: full };
+  return { name: full.slice(0, i), id: full.slice(i + 1) };
+}
+/* Crea la nube probando todos los servicios en cascada */
+function cloudCreate(rec, onProgress, cb){
+  var idx = 0;
+  var fails = [];
+  function attempt(){
+    if (idx >= CLOUD_PROVIDERS.length){
+      cb(null, 'todos los servicios fallaron (' + fails.join(', ') + ')');
+      return;
+    }
+    var p = CLOUD_PROVIDERS[idx++];
+    if (onProgress) onProgress('Probando ' + p.label + ' (servicio ' + idx + ' de ' + CLOUD_PROVIDERS.length + ')…');
+    p.create(rec, function(id){
+      if (id){ cb(p.name + ':' + id); }
+      else { fails.push(p.label); attempt(); }
+    });
+  }
+  attempt();
+}
+function cloudPut(fullId, rec, ok, fail){
+  var s = splitCloudId(fullId);
+  var p = s ? findProvider(s.name) : null;
+  if (!p){ fail('nube desconocida'); return; }
+  p.put(s.id, rec, ok, fail);
+}
+function cloudGet(fullId, cb){
+  var s = splitCloudId(fullId);
+  var p = s ? findProvider(s.name) : null;
+  if (!p){ cb(null); return; }
+  p.get(s.id, cb);
+}
+
+/* ID efectivo: HTML → guardado local */
+function htmlCloudId(){ return (typeof CLOUD_ID === 'string' ? CLOUD_ID : '').trim(); }
 function localCloudId(){
   try { return localStorage.getItem(LS_CLOUD) || ''; } catch(e){ return ''; }
 }
-function effCloudId(){
-  return htmlCloudId() || localCloudId();
-}
-function setLocalCloudId(id){
-  try { localStorage.setItem(LS_CLOUD, id); } catch(e){}
-}
-function createCloud(cb){
-  var x = new XMLHttpRequest();
-  x.open('POST', 'https://jsonblob.com/api/jsonBlob', true);
-  x.setRequestHeader('Content-Type', 'application/json');
-  x.setRequestHeader('Accept', 'application/json');
-  x.timeout = 10000;
-  x.onload = function(){
-    try {
-      var loc = x.getResponseHeader('Location') || '';
-      var m = loc.match(/([0-9a-fA-F-]{16,})\s*$/);
-      if (x.status >= 200 && x.status < 300 && m){ cb(m[1]); return; }
-    } catch(e){}
-    cb(null);
-  };
-  x.onerror = x.ontimeout = function(){ cb(null); };
-  x.send(JSON.stringify(buildPublicRecord()));
-}
-function putCloud(id, rec, ok, fail){
-  var x = new XMLHttpRequest();
-  x.open('PUT', 'https://jsonblob.com/api/jsonBlob/' + id, true);
-  x.setRequestHeader('Content-Type', 'application/json');
-  x.timeout = 10000;
-  x.onload = function(){
-    if (x.status >= 200 && x.status < 300) ok();
-    else fail('error ' + x.status);
-  };
-  x.onerror = function(){ fail('sin conexión'); };
-  x.ontimeout = function(){ fail('sin conexión'); };
-  x.send(JSON.stringify(rec));
-}
-function getCloud(id, cb){
-  var x = new XMLHttpRequest();
-  x.open('GET', 'https://jsonblob.com/api/jsonBlob/' + id + '?_=' + Date.now(), true);
-  x.timeout = 8000;
-  x.onload = function(){
-    try {
-      if (x.status >= 200 && x.status < 300){
-        cb(JSON.parse(x.responseText));
-        return;
-      }
-    } catch(e){}
-    cb(null);
-  };
-  x.onerror = x.ontimeout = function(){ cb(null); };
-  x.send();
-}
+function effCloudId(){ return htmlCloudId() || localCloudId(); }
+function setLocalCloudId(id){ try { localStorage.setItem(LS_CLOUD, id); } catch(e){} }
+
 /* Los visitantes cargan lo publicado en segundo plano */
 function refreshFromPublished(){
   var id = effCloudId();
   if (!id) return;
-  getCloud(id, function(rec){
+  cloudGet(id, function(rec){
     if (!rec || typeof rec !== 'object') return;
     mergePublic(rec);
     state = load();
@@ -1061,12 +1172,11 @@ function applyHeroVideo(){
   v.loop = true;
   try { v.setAttribute('playsinline',''); v.setAttribute('webkit-playsinline',''); } catch(e){}
   if (reduced){
-    /* Con movimiento reducido: solo el primer fotograma */
     v.pause();
     v.addEventListener('loadeddata', function(){ try{ v.currentTime = 0; }catch(e){} }, { once:true });
   } else {
     var p = v.play();
-    if (p && p.catch) p.catch(function(){ /* Autoplay bloqueado: el usuario puede recargar */ });
+    if (p && p.catch) p.catch(function(){});
   }
 }
 
@@ -1097,7 +1207,7 @@ function toast(msg){
   t.textContent = msg;
   t.classList.add('show');
   clearTimeout(toastTimer);
-  toastTimer = setTimeout(function(){ t.classList.remove('show'); }, 3200);
+  toastTimer = setTimeout(function(){ t.classList.remove('show'); }, 3400);
 }
 
 /* ============ Menú de sitios ============ */
@@ -1168,16 +1278,18 @@ pubOverlay.addEventListener('click', function(e){
   setTimeout(function(){ ta.select(); }, 10);
 });
 
-/* Publicación automática: Guardar → nube. Si falla, ofrece el manual. */
+/* Publicación automática: Guardar → nube. Si falla, abre el respaldo. */
 function publishCloud(){
   var id = effCloudId();
   if (!id){
-    toast('Primero crea tu nube en el panel (Nube de publicación).');
-    openPub();
+    toast('Aún no hay nube. Créala en el panel (Nube de publicación).');
+    openDrawer();
+    var sec = $('#secCloud');
+    if (sec) setTimeout(function(){ sec.scrollIntoView({ behavior:'smooth', block:'center' }); }, 400);
     return;
   }
   toast('Publicando…');
-  putCloud(id, buildPublicRecord(), function(){
+  cloudPut(id, buildPublicRecord(), function(){
     toast('¡Publicado! Todos los visitantes lo ven al instante.');
   }, function(err){
     toast('No se pudo publicar (' + err + '). Abriendo método manual.');
@@ -1508,41 +1620,60 @@ function updateCloudUI(){
   var inp = $('#edCloudId');
   var btnCreate = $('#edCloudCreate');
   var btnCopy = $('#edCloudCopy');
+  var btnTest = $('#edCloudTest');
   var help = $('#edCloudHelp');
   if (htmlId){
     st.textContent = '✓ Automático activo. Cada vez que Guardes, todo se publica al instante para todos.';
     inp.hidden = true;
     btnCreate.hidden = true;
     btnCopy.hidden = true;
+    btnTest.hidden = false;
     help.textContent = '';
   } else if (localId){
-    st.textContent = 'Tu nube está creada. Último paso (una sola vez):';
+    st.textContent = '✓ Nube creada. Último paso (una sola vez):';
     inp.hidden = false;
     inp.value = localId;
     btnCreate.hidden = true;
     btnCopy.hidden = false;
-    help.innerHTML = 'Copia el ID y pégalo en tu index.html, en la línea <b>CLOUD_ID = \'\';</b> (búscala cerca del inicio del script). Luego sube el archivo a GitHub. Desde entonces, Guardar publicará automáticamente.';
+    btnTest.hidden = false;
+    help.innerHTML = 'Copia el ID y pégalo en tu index.html, en la línea <b>CLOUD_ID = \'\';</b> (cerca del inicio del script). Luego sube el archivo a GitHub. Desde entonces, Guardar publicará automáticamente.';
   } else {
-    st.textContent = 'Sin nube todavía. Toca «Crear mi nube gratis» — no necesita cuenta ni claves.';
+    st.textContent = 'Sin nube todavía. Toca «Crear mi nube gratis»: se prueban 4 servicios automáticamente y se usa el primero que responda. No necesita cuenta ni claves.';
     inp.hidden = true;
     btnCreate.hidden = false;
     btnCopy.hidden = true;
+    btnTest.hidden = true;
     help.textContent = '';
   }
 }
+
+function testCloud(){
+  var id = htmlCloudId() || localCloudId();
+  if (!id){ toast('Primero crea la nube.'); return; }
+  toast('Probando conexión con la nube…');
+  cloudPut(id, buildPublicRecord(), function(){
+    toast('✓ Conexión OK. Publicación funcionando.');
+  }, function(err){
+    toast('✗ La nube no responde (' + err + '). Intenta crear una nueva.');
+  });
+}
+
  $('#edCloudCreate').onclick = function(){
   var b = this;
   b.disabled = true;
   b.textContent = 'Creando…';
-  createCloud(function(id){
+  cloudCreate(buildPublicRecord(), function(msg){
+    b.textContent = msg;
+  }, function(fullId, err){
     b.disabled = false;
     b.textContent = 'Crear mi nube gratis';
-    if (id){
-      setLocalCloudId(id);
+    if (fullId){
+      setLocalCloudId(fullId);
       updateCloudUI();
       toast('¡Nube creada! Copia el ID y pégalo en el HTML (una sola vez).');
     } else {
-      toast('No se pudo crear la nube. Revisa tu conexión e inténtalo de nuevo.');
+      toast('No se pudo crear (' + err + '). Revisa tu conexión o usa el método manual.');
+      openPub();
     }
   });
 };
@@ -1550,6 +1681,7 @@ function updateCloudUI(){
   var id = localCloudId();
   if (id) copyRaw(id, 'ID copiado. Pégalo en el HTML en CLOUD_ID.');
 };
+ $('#edCloudTest').onclick = testCloud;
 
 function openDrawer(){
   if (!unlocked){ openAuth(); return; }
