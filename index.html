@@ -569,7 +569,7 @@
 
   <footer>
     <span class="mini">© <span id="footYear"></span> · <span id="footOwner"></span></span>
-    <span class="mini">frases_hishida · v17</span>
+    <span class="mini">frases_hishida · v18</span>
   </footer>
 
 </main>
@@ -743,7 +743,7 @@
    NUBE DE PUBLICACIÓN — CONFIGURACIÓN (una sola vez)
    Tras crear tu nube desde el panel, pega aquí el ID:
 ========================================================= */
-var CLOUD_ID = ''; /* ← PEGA AQUÍ TU ID, ejemplo: 'kvdb:AbCdEf123456' o 'jsonblob:abc123...' */
+var CLOUD_ID = ''; /* ← PEGA AQUÍ TU ID, ejemplo: 'jsonblob:abc123...' o 'kvdb:AbCdEf123456' */
 
 /* ============ Utilidades ============ */
 function $(s){ return document.querySelector(s); }
@@ -788,9 +788,41 @@ function copyText(t){ copyRaw(t, 'Copiado: ' + t); }
 
 /* =========================================================
    REDIRECCIÓN DIRECTA — sin "copiar enlace"
+   Android: intent:// fuerza la apertura en Chrome REAL
+   (fuera del navegador interno de TikTok/Instagram/etc.),
+   con respaldo automático si Chrome no está disponible.
+   iOS / PC: abre en pestaña nueva (Safari desde apps).
 ========================================================= */
-function navigateTo(url){
-  window.location.href = url;
+var UA = (navigator.userAgent || '').toLowerCase();
+var IS_ANDROID = UA.indexOf('android') > -1;
+
+function openExternal(url){
+  if (IS_ANDROID){
+    /* Quita https:// y arma el intent hacia Chrome */
+    var clean = url.replace(/^https?:\/\//i, '');
+    var intent = 'intent://' + clean
+      + '#Intent;scheme=https;package=com.android.chrome'
+      + ';S.browser_fallback_url=' + encodeURIComponent(url)
+      + ';end';
+    var left = false;
+    function onLeave(){ left = true; }
+    document.addEventListener('visibilitychange', onLeave, { once:true });
+    window.addEventListener('pagehide', onLeave, { once:true });
+    /* Lanza el intent: el sistema abre Chrome fuera de la app */
+    window.location.href = intent;
+    /* Si nada se abrió en 1.5s, navega directo como respaldo */
+    setTimeout(function(){
+      if (!left && !document.hidden){
+        window.location.href = url;
+      }
+    }, 1500);
+  } else {
+    /* iOS y escritorio: pestaña nueva */
+    var w = window.open(url, '_blank');
+    if (!w){
+      window.location.href = url;
+    }
+  }
 }
 
 /* ============ ICONOS OFICIALES CON COLOR DE MARCA ============ */
@@ -950,7 +982,6 @@ autoFixGlyphs(state.platforms);
 
 /* =========================================================
    NUBE DE PUBLICACIÓN CON 4 SERVICIOS EN CASCADA
-   Si uno falla o está bloqueado, prueba el siguiente.
 ========================================================= */
 function xhrRaw(method, url, body, headers, ok, fail){
   var x = new XMLHttpRequest();
@@ -1076,14 +1107,12 @@ function findProvider(name){
   }
   return null;
 }
-/* ID completo 'proveedor:id'; los ID antiguos sin prefijo eran jsonblob */
 function splitCloudId(full){
   if (!full) return null;
   var i = full.indexOf(':');
   if (i < 0) return { name:'jsonblob', id: full };
   return { name: full.slice(0, i), id: full.slice(i + 1) };
 }
-/* Crea la nube probando todos los servicios en cascada */
 function cloudCreate(rec, onProgress, cb){
   var idx = 0;
   var fails = [];
@@ -1114,7 +1143,6 @@ function cloudGet(fullId, cb){
   p.get(s.id, cb);
 }
 
-/* ID efectivo: HTML → guardado local */
 function htmlCloudId(){ return (typeof CLOUD_ID === 'string' ? CLOUD_ID : '').trim(); }
 function localCloudId(){
   try { return localStorage.getItem(LS_CLOUD) || ''; } catch(e){ return ''; }
@@ -1122,7 +1150,6 @@ function localCloudId(){
 function effCloudId(){ return htmlCloudId() || localCloudId(); }
 function setLocalCloudId(id){ try { localStorage.setItem(LS_CLOUD, id); } catch(e){} }
 
-/* Los visitantes cargan lo publicado en segundo plano */
 function refreshFromPublished(){
   var id = effCloudId();
   if (!id) return;
@@ -1231,7 +1258,7 @@ document.addEventListener('click', function(e){
   closeAdminMenu();
   var url = ((state.sys2 && state.sys2.url) || '').trim();
   if (url){
-    navigateTo(url);
+    openExternal(url);
   } else {
     toast('Configura el enlace de Sitio web 2 desde el icono de ojo.');
   }
@@ -1278,7 +1305,6 @@ pubOverlay.addEventListener('click', function(e){
   setTimeout(function(){ ta.select(); }, 10);
 });
 
-/* Publicación automática: Guardar → nube. Si falla, abre el respaldo. */
 function publishCloud(){
   var id = effCloudId();
   if (!id){
@@ -1330,7 +1356,7 @@ function openPlatModal(p){
     btn.className = 'pm-visit';
     btn.type = 'button';
     btn.innerHTML = 'Visitar ' + ICON.arrow;
-    btn.onclick = function(){ closePlatModal(); navigateTo(url); };
+    btn.onclick = function(){ closePlatModal(); openExternal(url); };
     actions.appendChild(btn);
   } else {
     actions.innerHTML = '<span class="pm-nolink">Enlace por configurar</span>';
