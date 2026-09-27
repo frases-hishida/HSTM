@@ -330,7 +330,7 @@
     padding:11px 22px;font-weight:700;font-size:13px;
     background:#fff;color:#0a0a0b;border:1px solid #fff;
     transition:background .25s,color .25s,transform .25s;
-    text-decoration:none;
+    text-decoration:none;cursor:pointer;
   }
   .pm-visit:hover,.pm-visit:active{background:transparent;color:#fff}
   .pm-visit svg{width:14px;height:14px}
@@ -542,7 +542,7 @@
 
   <footer>
     <span class="mini">© <span id="footYear"></span> · <span id="footOwner"></span></span>
-    <span class="mini">frases_hishida · v13</span>
+    <span class="mini">frases_hishida · v14</span>
   </footer>
 
 </main>
@@ -678,7 +678,7 @@
   </div>
 
   <footer class="drawer-foot">
-    <span class="mini">«Guardar» = vista previa en este navegador. «Publicar» = genera el código para que TODOS lo vean.</span>
+    <span class="mini">«Guardar» = vista previa local. «Publicar» = genera el código para que TODOS lo vean.</span>
     <div class="drawer-foot-btns">
       <button class="btn ghost" id="edDiscard">Descartar</button>
       <button class="btn ghost" id="edSave">Guardar</button>
@@ -730,12 +730,63 @@ function copyRaw(t, msg){
   } else fallback();
 }
 function copyText(t){ copyRaw(t, 'Copiado: ' + t); }
-function openExternal(url){
-  var a = document.createElement('a');
-  a.href = url; a.target = '_blank'; a.rel = 'noopener';
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
+
+/* =========================================================
+   REDIRECCIÓN DIRECTA — sin "copiar enlace"
+   1. Intenta abrir la APP nativa (TikTok, Instagram, etc.).
+   2. Si la app no responde, navega a la web en el navegador.
+   3. Método doble para máxima compatibilidad con webviews.
+========================================================= */
+var UA = (navigator.userAgent || '').toLowerCase();
+var IS_ANDROID = UA.indexOf('android') > -1;
+
+/* Esquemas de app nativa por plataforma (Android) */
+var APP_SCHEMES = {
+  tiktok:    'snssdk1233://',
+  instagram: 'instagram://',
+  facebook:  'fb://',
+  whatsapp:  'whatsapp://',
+  youtube:   'vnd.youtube://'
+};
+function detectBrand(url){
+  var u = (url || '').toLowerCase();
+  if (u.indexOf('tiktok') > -1) return 'tiktok';
+  if (u.indexOf('instagram') > -1) return 'instagram';
+  if (u.indexOf('facebook') > -1 || u.indexOf('fb.com') > -1) return 'facebook';
+  if (u.indexOf('whatsapp') > -1) return 'whatsapp';
+  if (u.indexOf('youtube') > -1 || u.indexOf('youtu.be') > -1) return 'youtube';
+  return null;
+}
+function navigateTo(url){
+  /* Si no es Android, la navegación directa funciona en todos los casos */
+  if (!IS_ANDROID){
+    window.location.href = url;
+    return;
+  }
+  /* En Android: intenta abrir la app nativa primero */
+  var brand = detectBrand(url);
+  var scheme = brand ? APP_SCHEMES[brand] : null;
+  if (scheme){
+    var t0 = Date.now();
+    var left = false;
+    function onLeave(){ left = true; }
+    document.addEventListener('visibilitychange', onLeave, { once:true });
+    window.addEventListener('pagehide', onLeave, { once:true });
+    /* Intento de app nativa */
+    var ifr = document.createElement('iframe');
+    ifr.style.cssText = 'position:fixed;width:0;height:0;border:0;opacity:0';
+    ifr.src = scheme;
+    document.body.appendChild(ifr);
+    setTimeout(function(){ ifr.remove(); }, 1200);
+    /* Si en 1.2s la página sigue visible, la app no abrió: navega a la web */
+    setTimeout(function(){
+      if (!left && !document.hidden){
+        window.location.href = url;
+      }
+    }, 1200);
+  } else {
+    window.location.href = url;
+  }
 }
 
 /* ============ ICONOS OFICIALES CON COLOR DE MARCA ============ */
@@ -797,10 +848,7 @@ var ICON = {
   moon: '<path d="M20 13.6A8 8 0 1 1 10.4 4 6.4 6.4 0 0 0 20 13.6z"/>'
 };
 
-/* ============ Estado base ============
-   1. SEED: datos de fábrica.
-   2. DATOS_PUBLICOS (datos.js subido a GitHub): lo que ven TODOS.
-   3. localStorage: tu vista previa local (solo tu navegador). */
+/* ============ Estado base ============ */
 var LS_KEY = 'fh.kit.v10';
 var SEED = {
   admin: { user:'frases_hishida', pass:null },
@@ -834,7 +882,6 @@ if (window.DATOS_PUBLICOS && typeof window.DATOS_PUBLICOS === 'object'){
   if (_D.updatedAt) BASE.updatedAt = _D.updatedAt;
 }
 
-/* Auto-reparación de iconos mal asignados */
 var KNOWN_BRANDS = ['facebook','youtube','whatsapp','instagram','tiktok'];
 var NAME_TO_BRAND = [
   ['face','facebook'], ['youtube','youtube'], ['insta','instagram'],
@@ -860,7 +907,6 @@ function autoFixGlyphs(plats){
   return fixed;
 }
 
-/* Carga VALIDADA: base pública + ajustes locales (vista previa del dueño) */
 function load(){
   var out = clone(BASE);
   try {
@@ -882,7 +928,7 @@ function load(){
         if (saved.updatedAt) out.updatedAt = saved.updatedAt;
       }
     }
-  } catch(e){ /* datos locales corruptos: se usa la base pública */ }
+  } catch(e){}
   return out;
 }
 function persist(){ try { localStorage.setItem(LS_KEY, JSON.stringify(state)); } catch(e){} }
@@ -960,7 +1006,7 @@ document.addEventListener('click', function(e){
   closeAdminMenu();
   var url = ((state.sys2 && state.sys2.url) || '').trim();
   if (url){
-    openExternal(url);
+    navigateTo(url);
   } else {
     toast('Configura el enlace de Sitio web 2 desde el icono de ojo.');
   }
@@ -1032,7 +1078,13 @@ function openPlatModal(p){
   var url = (p.url || '').trim();
   var actions = $('#pmActions');
   if (url){
-    actions.innerHTML = '<a class="pm-visit" href="' + esc(url) + '" target="_blank" rel="noopener">Visitar ' + ICON.arrow + '</a>';
+    actions.innerHTML = '';
+    var btn = document.createElement('button');
+    btn.className = 'pm-visit';
+    btn.type = 'button';
+    btn.innerHTML = 'Visitar ' + ICON.arrow;
+    btn.onclick = function(){ closePlatModal(); navigateTo(url); };
+    actions.appendChild(btn);
   } else {
     actions.innerHTML = '<span class="pm-nolink">Enlace por configurar</span>';
   }
@@ -1461,7 +1513,6 @@ drawerEl.addEventListener('click', function(e){
   }
 };
 
-/* Validación + guardado compartido por Guardar y Publicar */
 function applySave(){
   document.querySelectorAll('.ed-name.err').forEach(function(el){ el.classList.remove('err'); });
   if (!$('#edOwner').value.trim()){ toast('El nombre público no puede quedar vacío.'); $('#edOwner').focus(); return false; }
