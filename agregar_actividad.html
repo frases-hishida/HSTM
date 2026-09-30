@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}Agregar Actividad - Brigada Juvenil 2026{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto">
+    <div class="mb-4"><a href="{{ url_for('actividades') }}" class="text-red-500 hover:text-red-600">← Volver</a></div>
+    <div class="flex items-center mb-6"><div class="w-12 h-12 bg-red-100 rounded-xl flex items-center justify-center border-2 border-red-500 mr-4"><i class="fas fa-calendar-plus text-red-500 text-xl"></i></div><div><h1 class="text-3xl font-bold text-primary">Agregar Actividad</h1><p class="text-secondary">Planificar una nueva actividad</p></div></div>
+
+    <form method="POST" class="card p-6">
+        <div class="section-title mb-4"><h2 class="text-lg font-bold text-primary"><i class="fas fa-info-circle text-red-500 mr-2"></i>Datos de la Actividad</h2></div>
+        <div class="space-y-4">
+            <div><label class="block text-primary font-semibold mb-2">Título *</label><input type="text" name="titulo" required maxlength="100" class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-red-500 outline-none text-primary" placeholder="Título"><p class="text-muted">Máximo 100</p></div>
+            <div><label class="block text-primary font-semibold mb-2">Descripción</label><textarea name="descripcion" rows="3" class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-red-500 outline-none text-primary" placeholder="Descripción detallada"></textarea><p class="text-muted">Máximo 500</p></div>
+            <div><label class="block text-primary font-semibold mb-2">Fecha *</label><input type="date" name="fecha" required class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-red-500 outline-none text-primary"></div>
+            <div class="grid grid-cols-2 gap-4"><div><label class="block text-primary font-semibold mb-2">Hora Inicio</label><input type="time" name="hora_inicio" class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-red-500 outline-none text-primary"></div><div><label class="block text-primary font-semibold mb-2">Hora Fin</label><input type="time" name="hora_fin" class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-red-500 outline-none text-primary"></div></div>
+            <div><label class="block text-primary font-semibold mb-2">Tipo</label><select name="tipo" class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-red-500 outline-none text-primary"><option value="Teorica">Teórica</option><option value="Practica">Práctica</option><option value="Deportiva">Deportiva</option><option value="Social">Social</option><option value="Emergencia">Emergencia</option></select></div>
+            <div><label class="block text-primary font-semibold mb-2">Patrulla</label><select name="patrulla_id" class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-red-500 outline-none text-primary"><option value="">Todas</option>{% for p in patrullas %}<option value="{{ p.id }}">{{ p.nombre }}</option>{% endfor %}</select></div>
+            <div><label class="block text-primary font-semibold mb-2">Lugar</label><input type="text" name="lugar" maxlength="100" class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-red-500 outline-none text-primary" placeholder="Ubicación"><p class="text-muted">Máximo 100</p></div>
+            <div><label class="block text-primary font-semibold mb-2">Notas</label><textarea name="notas" rows="3" class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-red-500 outline-none text-primary" placeholder="Notas adicionales"></textarea><p class="text-muted">Máximo 500</p></div>
+        </div>
+        <div class="flex gap-3 mt-6 pt-4 border-t-2 border-red-200">
+            <button type="submit" class="btn-primary px-6 py-2 rounded-lg"><i class="fas fa-save mr-2"></i>Crear Actividad</button>
+            <a href="{{ url_for('actividades') }}" class="bg-gray-400 text-white px-6 py-2 rounded-lg hover:bg-gray-500"><i class="fas fa-times mr-2"></i>Cancelar</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

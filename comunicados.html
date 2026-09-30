@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}Comunicados - Brigada Juvenil 2026{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto">
+    <div class="flex justify-between items-center mb-6">
+        <div>
+            <h1 class="text-3xl font-bold text-primary"><i class="fas fa-bullhorn text-red-500 mr-3"></i>Comunicados</h1>
+            <p class="text-secondary">Mensajes y anuncios de la brigada</p>
+        </div>
+        <a href="{{ url_for('agregar_comunicado') }}" class="btn-primary px-6 py-3 rounded-xl flex items-center gap-2 shadow-md hover:shadow-lg">
+            <i class="fas fa-plus"></i>Nuevo Comunicado
+        </a>
+    </div>
+
+    <div class="grid grid-cols-1 gap-6">
+        {% for c in comunicados %}
+        <div class="card p-6 hover:shadow-lg transition">
+            <div class="flex items-start justify-between">
+                <div>
+                    <h3 class="text-xl font-bold text-primary">{{ c.titulo }}</h3>
+                    <div class="flex items-center gap-3 text-sm text-secondary mt-1">
+                        <span><i class="fas fa-user mr-1"></i>{{ c.autor or 'Sistema' }}</span>
+                        <span><i class="fas fa-clock mr-1"></i>{{ c.fecha_publicacion|format_date('%d/%m/%Y %H:%M') }}</span>
+                        <span class="px-2 py-1 rounded-full text-xs badge-info">{{ c.destinatario }}</span>
+                    </div>
+                </div>
+                {% if session.user_rol == 'admin' %}
+                <!-- Botón Eliminar -->
+                <a href="{{ url_for('eliminar_comunicado', id=c.id) }}" class="text-red-500 hover:text-red-600" onclick="return confirm('¿Eliminar este comunicado?')">
+                    <i class="fas fa-trash text-xl"></i>
+                </a>
+                {% endif %}
+            </div>
+            <div class="mt-4 text-secondary whitespace-pre-line">{{ c.contenido }}</div>
+        </div>
+        {% else %}
+        <div class="text-center py-12 text-secondary">
+            <i class="fas fa-bullhorn text-4xl text-gray-300 mb-4"></i>
+            <p>No hay comunicados publicados</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

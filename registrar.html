@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% block title %}Crear Cuenta - Brigada Juvenil 2026{% endblock %}
+
+{% block login_content %}
+<div class="min-h-screen flex items-center justify-center p-4">
+    <div class="max-w-lg w-full">
+        <div class="text-center mb-6">
+            <!-- NUEVA IMAGEN SIN FONDO Y SIN ANIMACIÓN -->
+            <div>
+                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ7mxAV03RCfBHdxQbXjIUwoIPSf6Oc4R7xrxeVb1441Z6NYrCBY7_5Y7M&s=10" alt="Logo Brigada Juvenil" class="w-20 mx-auto">
+            </div>
+            <h1 class="text-3xl font-bold text-primary mb-1">Crear Cuenta</h1>
+            <p class="text-secondary">Únete a la Brigada Juvenil 2026</p>
+        </div>
+        <div class="bg-white rounded-2xl shadow-2xl p-8 border-2 border-red-200">
+            {% with messages = get_flashed_messages(with_categories=true) %}{% if messages %}{% for category, message in messages %}<div class="mb-4 p-3 rounded-lg border-l-4 {% if category == 'success' %}border-green-500 bg-green-50 text-green-700{% else %}border-red-500 bg-red-50 text-red-700{% endif %}">{{ message }}</div>{% endfor %}{% endif %}{% endwith %}
+            <form method="POST" id="registroForm" onsubmit="return validarFormulario()">
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-primary font-semibold mb-2"><i class="fas fa-user text-red-500 mr-2"></i>Usuario</label>
+                        <input type="text" name="nombre_usuario" id="nombre_usuario" required maxlength="20" class="w-full px-4 py-3 bg-white border-2 border-gray-300 rounded-xl focus:outline-none input-focus transition text-primary" placeholder="Usuario (máx. 20 caracteres)">
+                        <p class="text-xs text-secondary mt-1">Máximo 20 caracteres</p>
+                    </div>
+                    <div>
+                        <label class="block text-primary font-semibold mb-2"><i class="fas fa-id-card text-red-500 mr-2"></i>Nombre completo</label>
+                        <input type="text" name="nombre_completo" id="nombre_completo" required maxlength="100" class="w-full px-4 py-3 bg-white border-2 border-gray-300 rounded-xl focus:outline-none input-focus transition text-primary" placeholder="Tu nombre y apellido">
+                        <p class="text-xs text-secondary mt-1">Máximo 100 caracteres</p>
+                    </div>
+                    <div>
+                        <label class="block text-primary font-semibold mb-2"><i class="fas fa-envelope text-red-500 mr-2"></i>Correo electrónico</label>
+                        <input type="email" name="email" id="email" required maxlength="100" class="w-full px-4 py-3 bg-white border-2 border-gray-300 rounded-xl focus:outline-none input-focus transition text-primary" placeholder="tu@email.com">
+                        <p id="emailError" class="text-red-500 text-xs mt-1 hidden">Email inválido</p>
+                    </div>
+                    <div>
+                        <label class="block text-primary font-semibold mb-2"><i class="fas fa-lock text-red-500 mr-2"></i>Contraseña</label>
+                        <div class="relative">
+                            <input type="password" name="contraseña" id="password" required minlength="8" maxlength="20" class="w-full px-4 py-3 bg-white border-2 border-gray-300 rounded-xl focus:outline-none input-focus transition pr-12 text-primary" placeholder="Contraseña (8-20 caracteres)">
+                            <button type="button" onclick="togglePassword('password', 'passwordIcon')" class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500"><i id="passwordIcon" class="fas fa-eye"></i></button>
+                        </div>
+                        <div id="passwordError" class="text-xs mt-1 hidden"><span id="passwordErrorMessage"></span></div>
+                        <div id="passwordHint" class="text-xs text-secondary mt-1">Debe tener entre 8 y 20 caracteres</div>
+                    </div>
+                    <div>
+                        <label class="block text-primary font-semibold mb-2"><i class="fas fa-check-circle text-red-500 mr-2"></i>Confirmar contraseña</label>
+                        <div class="relative">
+                            <input type="password" id="confirm_password" required minlength="8" maxlength="20" class="w-full px-4 py-3 bg-white border-2 border-gray-300 rounded-xl focus:outline-none input-focus transition pr-12 text-primary" placeholder="Repite tu contraseña">
+                            <button type="button" onclick="togglePassword('confirm_password', 'confirmIcon')" class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500"><i id="confirmIcon" class="fas fa-eye"></i></button>
+                        </div>
+                        <div id="confirmError" class="text-red-500 text-xs mt-1 hidden">Las contraseñas no coinciden</div>
+                    </div>
+                    <div>
+                        <label class="block text-primary font-semibold mb-2"><i class="fas fa-question-circle text-red-500 mr-2"></i>Pregunta secreta</label>
+                        <select name="pregunta_secreta" id="pregunta_secreta" required class="w-full px-4 py-3 bg-white border-2 border-gray-300 rounded-xl focus:border-red-500 outline-none text-primary">
+                            <option value="">Selecciona una pregunta</option>
+                            <option>¿Cuál es el nombre de tu primera mascota?</option>
+                            <option>¿Cuál es tu ciudad natal?</option>
+                            <option>¿Nombre de tu mejor amigo de la infancia?</option>
+                            <option>¿Cuál es tu comida favorita?</option>
+                            <option>¿Color favorito?</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-primary font-semibold mb-2"><i class="fas fa-key text-red-500 mr-2"></i>Respuesta secreta</label>
+                        <input type="text" name="respuesta_secreta" id="respuesta_secreta" required maxlength="100" class="w-full px-4 py-3 bg-white border-2 border-gray-300 rounded-xl focus:outline-none input-focus transition text-primary" placeholder="Tu respuesta">
+                        <p class="text-xs text-secondary mt-1">Máximo 100 caracteres</p>
+                    </div>
+                    <div class="flex items-center">
+                        <input type="checkbox" id="terminos" required class="w-4 h-4 text-red-600 rounded border-2 border-gray-300">
+                        <label for="terminos" class="ml-2 text-sm text-secondary">Acepto los <a href="#" class="text-red-500 hover:underline">términos y condiciones</a></label>
+                    </div>
+                    <button type="submit" class="btn-primary w-full py-3 rounded-xl font-semibold"><i class="fas fa-user-plus mr-2"></i>Crear Cuenta</button>
+                    <div class="text-center"><p class="text-secondary">¿Ya tienes cuenta? <a href="{{ url_for('login') }}" class="text-red-500 font-semibold hover:underline">Inicia sesión aquí</a></p></div>
+                </div>
+            </form>
+        </div>
+        <div class="text-center mt-6 text-gray-500 text-sm">© 2026 Brigada Juvenil - Bomberos El Paso</div>
+    </div>
+</div>
+<script>
+    function togglePassword(fieldId, iconId) { const f=document.getElementById(fieldId); const i=document.getElementById(iconId); if(f.type==='password'){f.type='text'; i.classList.remove('fa-eye'); i.classList.add('fa-eye-slash');}else{f.type='password'; i.classList.remove('fa-eye-slash'); i.classList.add('fa-eye');} }
+    document.getElementById('email')?.addEventListener('input',function(){const e=this.value; const r=/^[^\s@]+@[^\s@]+\.[^\s@]+$/; const d=document.getElementById('emailError'); if(e.length>0&&!r.test(e))d.classList.remove('hidden'); else d.classList.add('hidden');});
+    document.getElementById('password')?.addEventListener('input',function(){const p=this.value; const eDiv=document.getElementById('passwordError'); const hint=document.getElementById('passwordHint'); const msg=document.getElementById('passwordErrorMessage'); if(p.length>0&&p.length<8){eDiv.classList.remove('hidden'); msg.innerHTML='Mínimo 8 caracteres'; eDiv.style.color='#dc2626'; hint.classList.add('hidden');}else if(p.length>20){eDiv.classList.remove('hidden'); msg.innerHTML='Máximo 20 caracteres'; eDiv.style.color='#dc2626'; hint.classList.add('hidden');}else if(p.length>=8&&p.length<=20){eDiv.classList.remove('hidden'); msg.innerHTML='✓ Válida'; eDiv.style.color='#16a34a'; setTimeout(()=>{eDiv.classList.add('hidden'); hint.classList.remove('hidden');},2000);}else{eDiv.classList.add('hidden'); hint.classList.remove('hidden');} verificarCoincidencia();});
+    function verificarCoincidencia(){const p=document.getElementById('password').value; const c=document.getElementById('confirm_password').value; const e=document.getElementById('confirmError'); if(c.length>0&&p!==c)e.classList.remove('hidden'); else e.classList.add('hidden');}
+    document.getElementById('confirm_password')?.addEventListener('input',verificarCoincidencia);
+    function validarFormulario(){const p=document.getElementById('password').value; const c=document.getElementById('confirm_password').value; const e=document.getElementById('email').value; const r=/^[^\s@]+@[^\s@]+\.[^\s@]+$/; const t=document.getElementById('terminos'); const u=document.getElementById('nombre_usuario').value; const n=document.getElementById('nombre_completo').value; const res=document.getElementById('respuesta_secreta').value;
+    if(u.length>20){alert('❌ El usuario no puede tener más de 20 caracteres'); return false;} if(n.length>100){alert('❌ El nombre no puede tener más de 100 caracteres'); return false;} if(res.length>100){alert('❌ La respuesta secreta no puede tener más de 100 caracteres'); return false;} if(p.length<8){alert('❌ Mínimo 8 caracteres'); return false;} if(p.length>20){alert('❌ Máximo 20 caracteres'); return false;} if(p!==c){alert('❌ No coinciden'); return false;} if(!r.test(e)){alert('❌ Email inválido'); return false;} if(!t.checked){alert('❌ Acepta términos'); return false;} return true;}
+</script>
+{% endblock %}

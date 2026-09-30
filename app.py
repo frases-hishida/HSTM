@@ -1,0 +1,1453 @@
+from flask import Flask, render_template, request, redirect, url_for, flash, session, send_file, jsonify
+import pymysql
+from datetime import datetime, timedelta
+import os
+from werkzeug.utils import secure_filename
+import hashlib
+import json
+import io
+from openpyxl import Workbook
+from reportlab.lib.pagesizes import letter
+from reportlab.pdfgen import canvas
+from reportlab.lib.utils import ImageReader
+
+app = Flask(__name__)
+app.secret_key = 'clave_super_secreta_brigada_2026'
+
+# ============================================
+# CONFIGURACIÓN DE ARCHIVOS
+# ============================================
+UPLOAD_FOLDER = 'static/uploads'
+UPLOAD_FOLDER_FOTOS = 'static/uploads/fotos'
+ALLOWED_IMAGE_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
+
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+app.config['UPLOAD_FOLDER_FOTOS'] = UPLOAD_FOLDER_FOTOS
+app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
+
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+os.makedirs(UPLOAD_FOLDER_FOTOS, exist_ok=True)
+
+# ============================================
+# CONFIGURACIÓN DE BASE DE DATOS
+# ============================================
+DB_CONFIG = {
+    'host': 'localhost',
+    'user': 'root',
+    'password': '',
+    'database': 'brigada_juvenil',
+    'cursorclass': pymysql.cursors.DictCursor
+}
+
+def get_db_connection():
+    return pymysql.connect(**DB_CONFIG)
+
+def hash_contraseña(contraseña):
+    return hashlib.sha256(contraseña.encode()).hexdigest()
+
+def allowed_image(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_IMAGE_EXTENSIONS
+
+def calcular_edad(fecha_nacimiento):
+    hoy = datetime.now().date()
+    return hoy.year - fecha_nacimiento.year - ((hoy.month, hoy.day) < (fecha_nacimiento.month, fecha_nacimiento.day))
+
+# ============================================
+# AUTENTICACIÓN
+# ============================================
+
+@app.route('/')
+def index():
+    if 'user_id' in session:
+        return redirect(url_for('dashboard'))
+    return redirect(url_for('login'))
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        usuario = request.form['usuario']
+        contraseña = hash_contraseña(request.form['contraseña'])
+        
+        if len(usuario) > 20:
+            flash('El usuario no puede exceder 20 caracteres', 'danger')
+            return render_template('login.html')
+        if len(request.form['contraseña']) > 10:
+            flash('La contraseña no puede exceder 10 caracteres', 'danger')
+            return render_template('login.html')
+        
+        connection = get_db_connection()
+        try:
+            with connection.cursor() as cursor:
+                cursor.execute("SELECT * FROM usuarios WHERE nombre_usuario = %s AND contraseña = %s AND activo = TRUE", 
+                             (usuario, contraseña))
+                user = cursor.fetchone()
+                if user:
+                    session['user_id'] = user['id']
+                    session['nombre_completo'] = user['nombre_completo']
+                    session['user_rol'] = user['rol']
+                    
+                    # Registrar en bitácora
+                    cursor.execute("INSERT INTO bitacora (usuario_id, accion, descripcion, ip) VALUES (%s, %s, %s, %s)",
+                                 (user['id'], 'LOGIN', 'Inicio de sesión', request.remote_addr))
+                    cursor.execute("UPDATE usuarios SET ultimo_acceso = NOW() WHERE id = %s", (user['id'],))
+                    connection.commit()
+                    
+                    flash('¡Bienvenido a la Brigada Juvenil 2026!', 'success')
+                    return redirect(url_for('dashboard'))
+                else:
+                    flash('Usuario o contraseña incorrectos', 'danger')
+        finally:
+            connection.close()
+    return render_template('login.html')
+
+@app.route('/registrar', methods=['GET', 'POST'])
+def registrar():
+    if request.method == 'POST':
+        nombre_usuario = request.form['nombre_usuario']
+        nombre_completo = request.form['nombre_completo']
+        email = request.form['email']
+        contraseña = hash_contraseña(request.form['contraseña'])
+        pregunta_secreta = request.form['pregunta_secreta']
+        respuesta_secreta = request.form['respuesta_secreta']
+        
+        if len(nombre_usuario) > 20:
+            flash('El nombre de usuario no puede exceder 20 caracteres', 'danger')
+            return render_template('registrar.html')
+        if len(request.form['contraseña']) < 8:
+            flash('La contraseña debe tener al menos 8 caracteres', 'danger')
+            return render_template('registrar.html')
+        if len(request.form['contraseña']) > 20:
+            flash('La contraseña no puede exceder 20 caracteres', 'danger')
+            return render_template('registrar.html')
+        
+        connection = get_db_connection()
+        try:
+            with connection.cursor() as cursor:
+                cursor.execute("""
+                    INSERT INTO usuarios (nombre_usuario, nombre_completo, email, contraseña, pregunta_secreta, respuesta_secreta)
+                    VALUES (%s, %s, %s, %s, %s, %s)
+                """, (nombre_usuario, nombre_completo, email, contraseña, pregunta_secreta, respuesta_secreta))
+                connection.commit()
+                flash('¡Registro exitoso! Ahora puedes iniciar sesión', 'success')
+                return redirect(url_for('login'))
+        except Exception:
+            flash('El usuario o email ya existe', 'danger')
+        finally:
+            connection.close()
+    return render_template('registrar.html')
+
+@app.route('/recuperar', methods=['GET', 'POST'])
+def recuperar():
+    if request.method == 'POST':
+        usuario = request.form['usuario']
+        respuesta = request.form['respuesta']
+        nueva_contraseña = hash_contraseña(request.form['nueva_contraseña'])
+        
+        connection = get_db_connection()
+        try:
+            with connection.cursor() as cursor:
+                cursor.execute("SELECT * FROM usuarios WHERE nombre_usuario = %s AND respuesta_secreta = %s", 
+                             (usuario, respuesta))
+                user = cursor.fetchone()
+                if user:
+                    cursor.execute("UPDATE usuarios SET contraseña = %s WHERE id = %s", (nueva_contraseña, user['id']))
+                    connection.commit()
+                    flash('Contraseña actualizada exitosamente', 'success')
+                    return redirect(url_for('login'))
+                else:
+                    flash('Usuario o respuesta incorrectos', 'danger')
+        finally:
+            connection.close()
+    return render_template('recuperar.html')
+
+@app.route('/verificar_usuario')
+def verificar_usuario():
+    usuario = request.args.get('usuario')
+    connection = get_db_connection()
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT pregunta_secreta, respuesta_secreta FROM usuarios WHERE nombre_usuario = %s", (usuario,))
+            user = cursor.fetchone()
+            if user:
+                return jsonify({'existe': True, 'pregunta': user['pregunta_secreta'], 'respuesta': user['respuesta_secreta']})
+            return jsonify({'existe': False})
+    finally:
+        connection.close()
+
+@app.route('/logout')
+def logout():
+    if 'user_id' in session:
+        connection = get_db_connection()
+        try:
+            with connection.cursor() as cursor:
+                cursor.execute("INSERT INTO bitacora (usuario_id, accion, descripcion) VALUES (%s, %s, %s)",
+                             (session['user_id'], 'LOGOUT', 'Cierre de sesión'))
+                connection.commit()
+        finally:
+            connection.close()
+    session.clear()
+    return redirect(url_for('login'))
+
+# ============================================
+# DASHBOARD
+# ============================================
+
+@app.route('/dashboard')
+def dashboard():
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+    
+    connection = get_db_connection()
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT COUNT(*) as total FROM brigadistas WHERE condicion = 'Activo'")
+            total_brigadistas = cursor.fetchone()['total']
+            
+            cursor.execute("SELECT COUNT(*) as total FROM patrullas WHERE activo = TRUE")
+            total_patrullas = cursor.fetchone()['total']
+            
+            cursor.execute("SELECT COUNT(*) as total FROM usuarios WHERE activo = TRUE")
+            total_usuarios = cursor.fetchone()['total']
+            
+            hoy = datetime.now().date()
+            cursor.execute("SELECT COUNT(*) as total FROM asistencia WHERE fecha = %s AND estado = 'Presente'", (hoy,))
+            presentes_hoy = cursor.fetchone()['total']
+            cursor.execute("SELECT COUNT(*) as total FROM asistencia WHERE fecha = %s AND estado = 'Ausente'", (hoy,))
+            ausentes_hoy = cursor.fetchone()['total']
+            
+            total_hoy = presentes_hoy + ausentes_hoy
+            asistencia_hoy = round((presentes_hoy / total_hoy * 100) if total_hoy > 0 else 0)
+            
+            cursor.execute("""
+                SELECT COUNT(*) as total FROM evaluaciones 
+                WHERE MONTH(fecha) = MONTH(CURDATE()) AND YEAR(fecha) = YEAR(CURDATE())
+            """)
+            evaluaciones_mes = cursor.fetchone()['total']
+            
+            cursor.execute("""
+                SELECT b.id, b.nombre, b.apellido, b.cedula, b.condicion, p.nombre as patrulla_nombre,
+                       TIMESTAMPDIFF(YEAR, b.fecha_nacimiento, CURDATE()) as edad
+                FROM brigadistas b 
+                LEFT JOIN patrullas p ON b.patrulla_id = p.id 
+                WHERE b.condicion = 'Activo' 
+                ORDER BY b.id DESC LIMIT 5
+            """)
+            ultimos_brigadistas = cursor.fetchall()
+    finally:
+        connection.close()
+    
+    return render_template('dashboard.html',
+                         total_brigadistas=total_brigadistas,
+                         total_patrullas=total_patrullas,
+                         total_usuarios=total_usuarios,
+                         asistencia_hoy=asistencia_hoy,
+                         presentes_hoy=presentes_hoy,
+                         ausentes_hoy=ausentes_hoy,
+                         evaluaciones_mes=evaluaciones_mes,
+                         ultimos_brigadistas=ultimos_brigadistas)
+
+# ============================================
+# BRIGADISTAS (CRUD)
+# ============================================
+
+@app.route('/brigadistas')
+def brigadistas():
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+    
+    connection = get_db_connection()
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute("""
+                SELECT b.*, p.nombre as patrulla_nombre,
+                       TIMESTAMPDIFF(YEAR, b.fecha_nacimiento, CURDATE()) as edad
+                FROM brigadistas b 
+                LEFT JOIN patrullas p ON b.patrulla_id = p.id 
+                ORDER BY b.id DESC
+            """)
+            brigadistas = cursor.fetchall()
+            cursor.execute("SELECT id, nombre FROM patrullas WHERE activo = TRUE")
+            patrullas = cursor.fetchall()
+    finally:
+        connection.close()
+    return render_template('brigadistas.html', brigadistas=brigadistas, patrullas=patrullas)
+
+@app.route('/agregar_brigadista', methods=['GET', 'POST'])
+def agregar_brigadista():
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+    
+    if request.method == 'POST':
+        nombre = request.form['nombre']
+        apellido = request.form['apellido']
+        cedula = request.form['cedula']
+        fecha_nacimiento = request.form['fecha_nacimiento']
+        genero = request.form.get('genero', 'Masculino')
+        direccion = request.form['direccion']
+        telefono = request.form['telefono']
+        telefono_emergencia = request.form.get('telefono_emergencia')
+        nombre_representante = request.form['nombre_representante']
+        telefono_representante = request.form['telefono_representante']
+        correo_representante = request.form.get('correo_representante')
+        escuela = request.form.get('escuela')
+        grado_estudio = request.form.get('grado_estudio')
+        alergias = request.form.get('alergias')
+        enfermedades_base = request.form.get('enfermedades_base')
+        tipo_sangre = request.form.get('tipo_sangre')
+        fecha_ingreso = request.form['fecha_ingreso']
+        patrulla_id = request.form.get('patrulla_id')
+        condicion = request.form.get('condicion', 'Activo')
+        observaciones = request.form.get('observaciones')
+        
+        foto = None
+        if 'foto' in request.files:
+            file = request.files['foto']
+            if file and allowed_image(file.filename):
+                ext = file.filename.rsplit('.', 1)[1].lower()
+                filename = secure_filename(f"brigadista_{cedula}_{datetime.now().timestamp()}.{ext}")
+                filepath = os.path.join(app.config['UPLOAD_FOLDER_FOTOS'], filename)
+                file.save(filepath)
+                foto = filename
+        
+        connection = get_db_connection()
+        try:
+            with connection.cursor() as cursor:
+                cursor.execute("""
+                    INSERT INTO brigadistas (nombre, apellido, cedula, fecha_nacimiento, genero,
+                                            direccion, telefono, telefono_emergencia, 
+                                            nombre_representante, telefono_representante, 
+                                            correo_representante, escuela, grado_estudio,
+                                            alergias, enfermedades_base, tipo_sangre, foto,
+                                            condicion, fecha_ingreso, patrulla_id, observaciones)
+                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                """, (nombre, apellido, cedula, fecha_nacimiento, genero,
+                      direccion, telefono, telefono_emergencia,
+                      nombre_representante, telefono_representante,
+                      correo_representante, escuela, grado_estudio,
+                      alergias, enfermedades_base, tipo_sangre, foto,
+                      condicion, fecha_ingreso, patrulla_id, observaciones))
+                connection.commit()
+                flash('Brigadista registrado exitosamente', 'success')
+                return redirect(url_for('brigadistas'))
+        except Exception as e:
+            flash(f'Error: {str(e)}', 'danger')
+        finally:
+            connection.close()
+    
+    connection = get_db_connection()
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT id, nombre FROM patrullas WHERE activo = TRUE")
+            patrullas = cursor.fetchall()
+    finally:
+        connection.close()
+    
+    return render_template('agregar_brigadista.html', patrullas=patrullas)
+
+@app.route('/ver_brigadista/<int:id>')
+def ver_brigadista(id):
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+    
+    connection = get_db_connection()
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute("""
+                SELECT b.*, p.nombre as patrulla_nombre,
+                       TIMESTAMPDIFF(YEAR, b.fecha_nacimiento, CURDATE()) as edad
+                FROM brigadistas b 
+                LEFT JOIN patrullas p ON b.patrulla_id = p.id 
+                WHERE b.id = %s
+            """, (id,))
+            brigadista = cursor.fetchone()
+    finally:
+        connection.close()
+    return render_template('ver_brigadista.html', brigadista=brigadista)
+
+@app.route('/editar_brigadista/<int:id>', methods=['GET', 'POST'])
+def editar_brigadista(id):
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+    
+    connection = get_db_connection()
+    
+    if request.method == 'POST':
+        nombre = request.form['nombre']
+        apellido = request.form['apellido']
+        cedula = request.form['cedula']
+        fecha_nacimiento = request.form['fecha_nacimiento']
+        genero = request.form.get('genero', 'Masculino')
+        direccion = request.form['direccion']
+        telefono = request.form['telefono']
+        telefono_emergencia = request.form.get('telefono_emergencia')
+        nombre_representante = request.form['nombre_representante']
+        telefono_representante = request.form['telefono_representante']
+        correo_representante = request.form.get('correo_representante')
+        escuela = request.form.get('escuela')
+        grado_estudio = request.form.get('grado_estudio')
+        alergias = request.form.get('alergias')
+        enfermedades_base = request.form.get('enfermedades_base')
+        tipo_sangre = request.form.get('tipo_sangre')
+        fecha_ingreso = request.form['fecha_ingreso']
+        patrulla_id = request.form.get('patrulla_id')
+        condicion = request.form.get('condicion', 'Activo')
+        observaciones = request.form.get('observaciones')
+        
+        foto = request.form.get('foto_actual')
+        if 'foto' in request.files:
+            file = request.files['foto']
+            if file and allowed_image(file.filename):
+                ext = file.filename.rsplit('.', 1)[1].lower()
+                filename = secure_filename(f"brigadista_{cedula}_{datetime.now().timestamp()}.{ext}")
+                filepath = os.path.join(app.config['UPLOAD_FOLDER_FOTOS'], filename)
+                file.save(filepath)
+                foto = filename
+        
+        try:
+            with connection.cursor() as cursor:
+                cursor.execute("""
+                    UPDATE brigadistas SET nombre=%s, apellido=%s, cedula=%s, 
+                    fecha_nacimiento=%s, genero=%s, direccion=%s, telefono=%s,
+                    telefono_emergencia=%s, nombre_representante=%s, 
+                    telefono_representante=%s, correo_representante=%s,
+                    escuela=%s, grado_estudio=%s, alergias=%s,
+                    enfermedades_base=%s, tipo_sangre=%s, foto=%s,
+                    condicion=%s, fecha_ingreso=%s, patrulla_id=%s, observaciones=%s
+                    WHERE id=%s
+                """, (nombre, apellido, cedula, fecha_nacimiento, genero,
+                      direccion, telefono, telefono_emergencia,
+                      nombre_representante, telefono_representante,
+                      correo_representante, escuela, grado_estudio,
+                      alergias, enfermedades_base, tipo_sangre, foto,
+                      condicion, fecha_ingreso, patrulla_id, observaciones, id))
+                connection.commit()
+                flash('Brigadista actualizado exitosamente', 'success')
+                return redirect(url_for('brigadistas'))
+        except Exception as e:
+            flash(f'Error: {str(e)}', 'danger')
+        finally:
+            connection.close()
+    
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT * FROM brigadistas WHERE id = %s", (id,))
+            brigadista = cursor.fetchone()
+            cursor.execute("SELECT id, nombre FROM patrullas WHERE activo = TRUE")
+            patrullas = cursor.fetchall()
+    finally:
+        connection.close()
+    
+    return render_template('editar_brigadista.html', brigadista=brigadista, patrullas=patrullas)
+
+@app.route('/eliminar_brigadista/<int:id>')
+def eliminar_brigadista(id):
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+    
+    connection = get_db_connection()
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT foto FROM brigadistas WHERE id = %s", (id,))
+            brigadista = cursor.fetchone()
+            if brigadista and brigadista['foto']:
+                foto_path = os.path.join(app.config['UPLOAD_FOLDER_FOTOS'], brigadista['foto'])
+                if os.path.exists(foto_path):
+                    os.remove(foto_path)
+            cursor.execute("DELETE FROM brigadistas WHERE id = %s", (id,))
+            connection.commit()
+        flash('Brigadista eliminado correctamente', 'warning')
+    except Exception as e:
+        flash(f'Error: {str(e)}', 'danger')
+    finally:
+        connection.close()
+    return redirect(url_for('brigadistas'))
+
+# ============================================
+# ASISTENCIA
+# ============================================
+
+@app.route('/asistencia')
+def asistencia():
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+
+    # Obtener fecha del query string, si no, usar hoy
+    fecha_str = request.args.get('fecha')
+    if fecha_str:
+        try:
+            fecha = datetime.strptime(fecha_str, '%Y-%m-%d').date()
+        except ValueError:
+            fecha = datetime.now().date()
+    else:
+        fecha = datetime.now().date()
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    # Consulta principal (con marcadores %s)
+    cursor.execute("""
+        SELECT a.*, b.nombre, b.apellido, p.nombre as patrulla_nombre
+        FROM asistencia a
+        JOIN brigadistas b ON a.brigadista_id = b.id
+        LEFT JOIN patrullas p ON b.patrulla_id = p.id
+        WHERE a.fecha = %s
+        ORDER BY a.id DESC
+    """, (fecha,))
+
+    asistencia = cursor.fetchall()
+
+    # Resumen por estados (cada consulta con su marcador)
+    cursor.execute("SELECT COUNT(*) as total FROM asistencia WHERE fecha = %s AND estado = 'Presente'", (fecha,))
+    total_presentes = cursor.fetchone()['total']
+
+    cursor.execute("SELECT COUNT(*) as total FROM asistencia WHERE fecha = %s AND estado = 'Ausente'", (fecha,))
+    total_ausentes = cursor.fetchone()['total']
+
+    cursor.execute("SELECT COUNT(*) as total FROM asistencia WHERE fecha = %s AND estado = 'Justificado'", (fecha,))
+    total_justificados = cursor.fetchone()['total']
+
+    cursor.execute("SELECT COUNT(*) as total FROM asistencia WHERE fecha = %s AND estado = 'Retardo'", (fecha,))
+    total_retardos = cursor.fetchone()['total']
+
+    conn.close()
+
+    return render_template('asistencia.html',
+                         asistencia=asistencia,
+                         total_presentes=total_presentes,
+                         total_ausentes=total_ausentes,
+                         total_justificados=total_justificados,
+                         total_retardos=total_retardos,
+                         fecha_filtro=fecha.strftime('%Y-%m-%d'))
+
+@app.template_filter('format_date')
+def format_date(value, format="%d/%m/%Y"):
+    if value is None:
+        return ""
+    if isinstance(value, str):
+        try:
+            dt = datetime.strptime(value, '%Y-%m-%d')
+        except ValueError:
+            return value
+        return dt.strftime(format)
+    elif isinstance(value, datetime):
+        return value.strftime(format)
+    return value                         
+
+@app.route('/marcar_asistencia', methods=['GET', 'POST'])
+def marcar_asistencia():
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+
+    if request.method == 'POST':
+        fecha = request.form.get('fecha', datetime.now().date().strftime('%Y-%m-%d'))
+        brigadistas_ids = request.form.getlist('brigadistas[]')
+        estados = request.form.getlist('estados[]')
+        horas_llegada = request.form.getlist('hora_llegada[]')
+        horas_salida = request.form.getlist('hora_salida[]')
+        observaciones = request.form.getlist('observaciones[]')
+
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        for i, brigadista_id in enumerate(brigadistas_ids):
+            estado = estados[i] if i < len(estados) else 'Presente'
+            hora_llegada = horas_llegada[i] if i < len(horas_llegada) else None
+            hora_salida = horas_salida[i] if i < len(horas_salida) else None
+            obs = observaciones[i] if i < len(observaciones) else None
+
+            cursor.execute("""
+                INSERT INTO asistencia (brigadista_id, fecha, estado, hora_llegada, hora_salida, observaciones, registrado_por)
+                VALUES (%s, %s, %s, %s, %s, %s, %s)
+                ON DUPLICATE KEY UPDATE
+                    estado = VALUES(estado),
+                    hora_llegada = VALUES(hora_llegada),
+                    hora_salida = VALUES(hora_salida),
+                    observaciones = VALUES(observaciones)
+            """, (brigadista_id, fecha, estado, hora_llegada, hora_salida, obs, session['user_id']))
+        conn.commit()
+        conn.close()
+
+        flash('Asistencia registrada exitosamente', 'success')
+        return redirect(url_for('asistencia'))
+
+    # GET: mostrar formulario de marcado
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT b.id, b.nombre, b.apellido, p.nombre as patrulla_nombre, b.patrulla_id
+        FROM brigadistas b
+        LEFT JOIN patrullas p ON b.patrulla_id = p.id
+        WHERE b.condicion = 'Activo'
+        ORDER BY b.nombre
+    """)
+    brigadistas = cursor.fetchall()
+    cursor.execute("SELECT id, nombre FROM patrullas WHERE activo = 1")
+    patrullas = cursor.fetchall()
+    conn.close()
+
+    return render_template('marcar_asistencia.html', brigadistas=brigadistas, patrullas=patrullas)
+
+@app.route('/eliminar_asistencia/<int:id>')
+def eliminar_asistencia(id):
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM asistencia WHERE id = %s", (id,))
+    conn.commit()
+    conn.close()
+
+    flash('Registro de asistencia eliminado correctamente', 'warning')
+    return redirect(url_for('asistencia'))
+
+# ============================================
+# PATRULLAS
+# ============================================
+
+@app.route('/patrullas')
+def patrullas():
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+    
+    connection = get_db_connection()
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute("""
+                SELECT p.*, 
+                       (SELECT COUNT(*) FROM brigadistas WHERE patrulla_id = p.id) as total_brigadistas
+                FROM patrullas p WHERE p.activo = TRUE
+            """)
+            patrullas = cursor.fetchall()
+    finally:
+        connection.close()
+    return render_template('patrullas.html', patrullas=patrullas)
+
+@app.route('/agregar_patrulla', methods=['GET', 'POST'])
+def agregar_patrulla():
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+    
+    if request.method == 'POST':
+        nombre = request.form['nombre']
+        descripcion = request.form.get('descripcion')
+        color = request.form.get('color', '#dc2626')
+        
+        connection = get_db_connection()
+        try:
+            with connection.cursor() as cursor:
+                cursor.execute("""
+                    INSERT INTO patrullas (nombre, descripcion, color, instructor_id)
+                    VALUES (%s, %s, %s, %s)
+                """, (nombre, descripcion, color, session['user_id']))
+                connection.commit()
+                flash('Patrulla creada exitosamente', 'success')
+                return redirect(url_for('patrullas'))
+        except Exception as e:
+            flash(f'Error: {str(e)}', 'danger')
+        finally:
+            connection.close()
+    
+    return render_template('agregar_patrulla.html')
+
+@app.route('/ver_patrulla/<int:id>')
+def ver_patrulla(id):
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT p.*, 
+               (SELECT COUNT(*) FROM brigadistas WHERE patrulla_id = p.id) as total_brigadistas,
+               u.nombre_completo as instructor_nombre
+        FROM patrullas p
+        LEFT JOIN usuarios u ON p.instructor_id = u.id
+        WHERE p.id = %s
+    """, (id,))  # ✅ COMA OBLIGATORIA
+    patrulla = cursor.fetchone()
+    conn.close()
+
+    if not patrulla:
+        flash('Patrulla no encontrada', 'danger')
+        return redirect(url_for('patrullas'))
+
+    return render_template('ver_patrulla.html', patrulla=patrulla)
+
+
+@app.route('/editar_patrulla/<int:id>', methods=['GET', 'POST'])
+def editar_patrulla(id):
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    if request.method == 'POST':
+        nombre = request.form['nombre']
+        descripcion = request.form.get('descripcion')
+        color = request.form.get('color', '#dc2626')
+
+        cursor.execute("""
+            UPDATE patrullas
+            SET nombre=%s, descripcion=%s, color=%s
+            WHERE id=%s
+        """, (nombre, descripcion, color, id))
+        conn.commit()
+        conn.close()
+        flash('Patrulla actualizada exitosamente', 'success')
+        return redirect(url_for('patrullas'))
+
+    # GET: obtener datos actuales
+    cursor.execute("SELECT * FROM patrullas WHERE id = %s", (id,))  # ✅ COMA OBLIGATORIA
+    patrulla = cursor.fetchone()
+    conn.close()
+
+    if not patrulla:
+        flash('Patrulla no encontrada', 'danger')
+        return redirect(url_for('patrullas'))
+
+    return render_template('editar_patrulla.html', patrulla=patrulla)
+
+@app.route('/eliminar_patrulla/<int:id>')
+def eliminar_patrulla(id):
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+    
+    connection = get_db_connection()
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute("UPDATE patrullas SET activo = FALSE WHERE id = %s", (id,))
+            connection.commit()
+        flash('Patrulla eliminada correctamente', 'warning')
+    except Exception as e:
+        flash(f'Error: {str(e)}', 'danger')
+    finally:
+        connection.close()
+    return redirect(url_for('patrullas'))
+
+# ============================================
+# EVALUACIONES
+# ============================================
+
+@app.route('/evaluaciones')
+def evaluaciones():
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+    
+    connection = get_db_connection()
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute("""
+                SELECT e.*, b.nombre, b.apellido, u.nombre_completo as instructor
+                FROM evaluaciones e
+                JOIN brigadistas b ON e.brigadista_id = b.id
+                LEFT JOIN usuarios u ON e.instructor_id = u.id
+                ORDER BY e.fecha DESC
+            """)
+            evaluaciones = cursor.fetchall()
+    finally:
+        connection.close()
+    return render_template('evaluaciones.html', evaluaciones=evaluaciones)
+
+@app.route('/agregar_evaluacion', methods=['GET', 'POST'])
+def agregar_evaluacion():
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+    
+    if request.method == 'POST':
+        brigadista_id = request.form['brigadista_id']
+        tipo = request.form['tipo']
+        fecha = request.form['fecha']
+        puntaje = request.form.get('puntaje')
+        calificacion = request.form.get('calificacion')
+        descripcion = request.form.get('descripcion')
+        observaciones = request.form.get('observaciones')
+        
+        connection = get_db_connection()
+        try:
+            with connection.cursor() as cursor:
+                cursor.execute("""
+                    INSERT INTO evaluaciones (brigadista_id, instructor_id, tipo, fecha, 
+                                             puntaje, calificacion, descripcion, observaciones)
+                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+                """, (brigadista_id, session['user_id'], tipo, fecha, puntaje, calificacion, descripcion, observaciones))
+                connection.commit()
+                flash('Evaluación registrada exitosamente', 'success')
+                return redirect(url_for('evaluaciones'))
+        except Exception as e:
+            flash(f'Error: {str(e)}', 'danger')
+        finally:
+            connection.close()
+    
+    connection = get_db_connection()
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT id, nombre, apellido FROM brigadistas WHERE condicion = 'Activo' ORDER BY nombre")
+            brigadistas = cursor.fetchall()
+    finally:
+        connection.close()
+    
+    return render_template('agregar_evaluacion.html', brigadistas=brigadistas)
+
+@app.route('/ver_evaluacion/<int:id>')
+def ver_evaluacion(id):
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT e.*, b.nombre, b.apellido, b.cedula, u.nombre_completo as instructor
+        FROM evaluaciones e
+        JOIN brigadistas b ON e.brigadista_id = b.id
+        LEFT JOIN usuarios u ON e.instructor_id = u.id
+        WHERE e.id = %s
+    """, (id,))
+    evaluacion = cursor.fetchone()
+    conn.close()
+    if not evaluacion:
+        flash('Evaluación no encontrada', 'danger')
+        return redirect(url_for('evaluaciones'))
+    return render_template('ver_evaluacion.html', evaluacion=evaluacion)
+
+@app.route('/editar_evaluacion/<int:id>', methods=['GET', 'POST'])
+def editar_evaluacion(id):
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    if request.method == 'POST':
+        # actualizar
+        cursor.execute("""
+            UPDATE evaluaciones
+            SET brigadista_id=%s, tipo=%s, fecha=%s, puntaje=%s, calificacion=%s, descripcion=%s, observaciones=%s
+            WHERE id=%s
+        """, (request.form['brigadista_id'], request.form['tipo'], request.form['fecha'],
+              request.form.get('puntaje'), request.form.get('calificacion'),
+              request.form.get('descripcion'), request.form.get('observaciones'), id))
+        conn.commit()
+        conn.close()
+        flash('Evaluación actualizada', 'success')
+        return redirect(url_for('evaluaciones'))
+    # GET
+    cursor.execute("SELECT * FROM evaluaciones WHERE id = %s", (id,))
+    evaluacion = cursor.fetchone()
+    cursor.execute("SELECT id, nombre, apellido FROM brigadistas WHERE condicion = 'Activo' ORDER BY nombre")
+    brigadistas = cursor.fetchall()
+    conn.close()
+    return render_template('editar_evaluacion.html', evaluacion=evaluacion, brigadistas=brigadistas)
+
+@app.route('/eliminar_evaluacion/<int:id>')
+def eliminar_evaluacion(id):
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM evaluaciones WHERE id = %s", (id,))
+    conn.commit()
+    conn.close()
+    flash('Evaluación eliminada', 'warning')
+    return redirect(url_for('evaluaciones'))
+
+# ============================================
+# ACTIVIDADES
+# ============================================
+
+@app.route('/actividades')
+def actividades():
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+    
+    connection = get_db_connection()
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute("""
+                SELECT a.*, p.nombre as patrulla_nombre, u.nombre_completo as instructor
+                FROM actividades a
+                LEFT JOIN patrullas p ON a.patrulla_id = p.id
+                LEFT JOIN usuarios u ON a.instructor_id = u.id
+                ORDER BY a.fecha DESC
+            """)
+            actividades = cursor.fetchall()
+    finally:
+        connection.close()
+    return render_template('actividades.html', actividades=actividades)
+
+@app.route('/agregar_actividad', methods=['GET', 'POST'])
+def agregar_actividad():
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+
+    if request.method == 'POST':
+        titulo = request.form['titulo']
+        descripcion = request.form.get('descripcion')
+        fecha = request.form['fecha']
+        hora_inicio = request.form.get('hora_inicio')
+        hora_fin = request.form.get('hora_fin')
+        tipo = request.form.get('tipo', 'Teorica')
+        patrulla_id = request.form.get('patrulla_id')
+        lugar = request.form.get('lugar')
+        notas = request.form.get('notas')
+
+        # Si patrulla_id está vacío, lo convertimos a None (NULL en SQL)
+        if patrulla_id == '':
+            patrulla_id = None
+
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        try:
+            cursor.execute("""
+                INSERT INTO actividades (titulo, descripcion, fecha, hora_inicio, hora_fin,
+                                        tipo, patrulla_id, instructor_id, lugar, notas)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            """, (titulo, descripcion, fecha, hora_inicio, hora_fin,
+                  tipo, patrulla_id, session['user_id'], lugar, notas))
+            conn.commit()
+            flash('Actividad creada exitosamente', 'success')
+            return redirect(url_for('actividades'))
+        except Exception as e:
+            flash(f'Error: {str(e)}', 'danger')
+            conn.rollback()
+        finally:
+            conn.close()
+
+    # GET: mostrar formulario
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT id, nombre FROM patrullas WHERE activo = 1")
+    patrullas = cursor.fetchall()
+    conn.close()
+
+    return render_template('agregar_actividad.html', patrullas=patrullas)
+
+@app.route('/ver_actividad/<int:id>')
+def ver_actividad(id):
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT a.*, p.nombre as patrulla_nombre, u.nombre_completo as instructor
+        FROM actividades a
+        LEFT JOIN patrullas p ON a.patrulla_id = p.id
+        LEFT JOIN usuarios u ON a.instructor_id = u.id
+        WHERE a.id = %s
+    """, (id,))
+    actividad = cursor.fetchone()
+    conn.close()
+    if not actividad:
+        flash('Actividad no encontrada', 'danger')
+        return redirect(url_for('actividades'))
+    return render_template('ver_actividad.html', actividad=actividad)
+
+@app.route('/editar_actividad/<int:id>', methods=['GET', 'POST'])
+def editar_actividad(id):
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    if request.method == 'POST':
+        cursor.execute("""
+            UPDATE actividades
+            SET titulo=%s, descripcion=%s, fecha=%s, hora_inicio=%s, hora_fin=%s,
+                tipo=%s, patrulla_id=%s, lugar=%s, notas=%s
+            WHERE id=%s
+        """, (request.form['titulo'], request.form.get('descripcion'), request.form['fecha'],
+              request.form.get('hora_inicio'), request.form.get('hora_fin'),
+              request.form.get('tipo'), request.form.get('patrulla_id'),
+              request.form.get('lugar'), request.form.get('notas'), id))
+        conn.commit()
+        conn.close()
+        flash('Actividad actualizada', 'success')
+        return redirect(url_for('actividades'))
+    # GET
+    cursor.execute("SELECT * FROM actividades WHERE id = %s", (id,))
+    actividad = cursor.fetchone()
+    cursor.execute("SELECT id, nombre FROM patrullas WHERE activo = 1")
+    patrullas = cursor.fetchall()
+    conn.close()
+    return render_template('editar_actividad.html', actividad=actividad, patrullas=patrullas)
+
+@app.route('/eliminar_actividad/<int:id>')
+def eliminar_actividad(id):
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM actividades WHERE id = %s", (id,))
+    conn.commit()
+    conn.close()
+    flash('Actividad eliminada', 'warning')
+    return redirect(url_for('actividades'))
+
+# ============================================
+# COMUNICADOS
+# ============================================
+
+@app.route('/comunicados')
+def comunicados():
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+    
+    connection = get_db_connection()
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute("""
+                SELECT c.*, u.nombre_completo as autor
+                FROM comunicados c
+                LEFT JOIN usuarios u ON c.creado_por = u.id
+                ORDER BY c.fecha_publicacion DESC
+            """)
+            comunicados = cursor.fetchall()
+    finally:
+        connection.close()
+    return render_template('comunicados.html', comunicados=comunicados)
+
+@app.route('/agregar_comunicado', methods=['GET', 'POST'])
+def agregar_comunicado():
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+    
+    if request.method == 'POST':
+        titulo = request.form['titulo']
+        contenido = request.form['contenido']
+        destinatario = request.form.get('destinatario', 'Todos')
+        
+        connection = get_db_connection()
+        try:
+            with connection.cursor() as cursor:
+                cursor.execute("""
+                    INSERT INTO comunicados (titulo, contenido, creado_por, destinatario)
+                    VALUES (%s, %s, %s, %s)
+                """, (titulo, contenido, session['user_id'], destinatario))
+                connection.commit()
+                flash('Comunicado publicado exitosamente', 'success')
+                return redirect(url_for('comunicados'))
+        except Exception as e:
+            flash(f'Error: {str(e)}', 'danger')
+        finally:
+            connection.close()
+    
+    return render_template('agregar_comunicado.html')
+
+@app.route('/eliminar_comunicado/<int:id>')
+def eliminar_comunicado(id):
+    if 'user_id' not in session or session.get('user_rol') != 'admin':
+        flash('No tienes permisos', 'danger')
+        return redirect(url_for('comunicados'))
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM comunicados WHERE id = %s", (id,))
+    conn.commit()
+    conn.close()
+
+    flash('Comunicado eliminado correctamente', 'warning')
+    return redirect(url_for('comunicados'))
+
+# ==================== COMUNICADOS - CRUD COMPLETO ====================
+
+@app.route('/ver_comunicado/<int:id>')
+def ver_comunicado(id):
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+    
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT c.*, u.nombre_completo as autor
+        FROM comunicados c
+        LEFT JOIN usuarios u ON c.creado_por = u.id
+        WHERE c.id = ?
+    """, (id,))
+    comunicado = cursor.fetchone()
+    conn.close()
+    
+    if not comunicado:
+        flash('Comunicado no encontrado', 'danger')
+        return redirect(url_for('comunicados'))
+    
+    return render_template('ver_comunicado.html', comunicado=comunicado)
+
+# ============================================
+# REPORTES
+# ============================================
+
+@app.route('/reportes')
+def reportes():
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    cursor.execute("SELECT COUNT(*) as total FROM brigadistas")
+    total_brigadistas = cursor.fetchone()['total']
+
+    cursor.execute("SELECT condicion, COUNT(*) as cantidad FROM brigadistas GROUP BY condicion")
+    condiciones = cursor.fetchall()
+
+    cursor.execute("""
+        SELECT p.nombre, COUNT(b.id) as cantidad
+        FROM patrullas p
+        LEFT JOIN brigadistas b ON p.id = b.patrulla_id
+        WHERE p.activo = 1
+        GROUP BY p.id
+    """)
+    patrullas_data = cursor.fetchall()
+
+    cursor.execute("SELECT tipo, COUNT(*) as cantidad FROM evaluaciones GROUP BY tipo")
+    evaluaciones_data = cursor.fetchall()
+
+    cursor.execute("""
+        SELECT b.nombre, b.apellido, b.cedula, p.nombre as patrulla_nombre, b.condicion
+        FROM brigadistas b
+        LEFT JOIN patrullas p ON b.patrulla_id = p.id
+        ORDER BY b.nombre
+        LIMIT 20
+    """)
+    brigadistas_lista = cursor.fetchall()
+
+    conn.close()
+
+    return render_template('reportes.html',
+                         total_brigadistas=total_brigadistas,
+                         condiciones=condiciones,
+                         patrullas_data=patrullas_data,
+                         evaluaciones_data=evaluaciones_data,
+                         brigadistas_lista=brigadistas_lista)
+
+@app.route('/exportar_excel')
+def exportar_excel():
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT b.nombre, b.apellido, b.cedula, b.telefono, p.nombre as patrulla, b.condicion
+        FROM brigadistas b
+        LEFT JOIN patrullas p ON b.patrulla_id = p.id
+        ORDER BY b.nombre
+    """)
+    brigadistas = cursor.fetchall()
+    conn.close()
+
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Brigadistas"
+
+    # Encabezados
+    headers = ['Nombre', 'Apellido', 'Cédula', 'Teléfono', 'Patrulla', 'Condición']
+    ws.append(headers)
+
+    # Datos
+    for b in brigadistas:
+        ws.append([b['nombre'], b['apellido'], b['cedula'], b['telefono'], b['patrulla'] or 'Sin asignar', b['condicion']])
+
+    # Guardar en memoria
+    output = io.BytesIO()
+    wb.save(output)
+    output.seek(0)
+
+    return send_file(output, as_attachment=True, download_name='reporte_brigadistas.xlsx', mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+
+@app.route('/exportar_pdf')
+def exportar_pdf():
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT b.nombre, b.apellido, b.cedula, p.nombre as patrulla, b.condicion
+        FROM brigadistas b
+        LEFT JOIN patrullas p ON b.patrulla_id = p.id
+        ORDER BY b.nombre
+    """)
+    brigadistas = cursor.fetchall()
+    conn.close()
+
+    buffer = io.BytesIO()
+    c = canvas.Canvas(buffer, pagesize=letter)
+    width, height = letter
+
+    # Título
+    c.setFont("Helvetica-Bold", 16)
+    c.drawString(50, height - 50, "Reporte de Brigadistas - Brigada Juvenil 2026")
+    c.setFont("Helvetica", 10)
+    c.drawString(50, height - 70, f"Fecha: {datetime.now().strftime('%d/%m/%Y %H:%M')}")
+
+    # Cabeceras de tabla
+    y = height - 100
+    c.setFont("Helvetica-Bold", 10)
+    c.drawString(50, y, "Nombre")
+    c.drawString(150, y, "Cédula")
+    c.drawString(250, y, "Patrulla")
+    c.drawString(350, y, "Condición")
+
+    # Datos
+    c.setFont("Helvetica", 9)
+    y -= 20
+    for b in brigadistas:
+        if y < 50:
+            c.showPage()
+            y = height - 50
+            c.setFont("Helvetica", 9)
+        nombre = f"{b['nombre']} {b['apellido']}"
+        c.drawString(50, y, nombre[:30])
+        c.drawString(150, y, b['cedula'])
+        c.drawString(250, y, b['patrulla'] or 'Sin asignar')
+        c.drawString(350, y, b['condicion'])
+        y -= 18
+
+    c.save()
+    buffer.seek(0)
+
+    return send_file(buffer, as_attachment=True, download_name='reporte_brigadistas.pdf', mimetype='application/pdf')
+
+# ============================================
+# PERFIL
+# ============================================
+
+@app.route('/perfil')
+def perfil():
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+    
+    connection = get_db_connection()
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT * FROM usuarios WHERE id = %s", (session['user_id'],))
+            usuario = cursor.fetchone()
+    finally:
+        connection.close()
+    return render_template('perfil.html', usuario=usuario)
+
+@app.route('/editar_perfil', methods=['POST'])
+def editar_perfil():
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+    
+    nombre_completo = request.form['nombre_completo']
+    email = request.form['email']
+    nueva_contraseña = request.form.get('nueva_contraseña')
+    
+    connection = get_db_connection()
+    try:
+        with connection.cursor() as cursor:
+            if nueva_contraseña:
+                if len(nueva_contraseña) < 8:
+                    flash('La nueva contraseña debe tener al menos 8 caracteres', 'danger')
+                    return redirect(url_for('perfil'))
+                if len(nueva_contraseña) > 20:
+                    flash('La nueva contraseña no puede tener más de 20 caracteres', 'danger')
+                    return redirect(url_for('perfil'))
+                contraseña_hash = hash_contraseña(nueva_contraseña)
+                cursor.execute("""
+                    UPDATE usuarios SET nombre_completo=%s, email=%s, contraseña=%s 
+                    WHERE id=%s
+                """, (nombre_completo, email, contraseña_hash, session['user_id']))
+            else:
+                cursor.execute("""
+                    UPDATE usuarios SET nombre_completo=%s, email=%s 
+                    WHERE id=%s
+                """, (nombre_completo, email, session['user_id']))
+            connection.commit()
+            session['nombre_completo'] = nombre_completo
+            flash('Perfil actualizado correctamente', 'success')
+    except Exception as e:
+        flash(f'Error: {str(e)}', 'danger')
+    finally:
+        connection.close()
+    return redirect(url_for('perfil'))
+
+# ============================================
+# CONFIGURACIÓN (SOLO ADMIN)
+# ============================================
+
+@app.route('/configuracion')
+def configuracion():
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+    if session.get('user_rol') != 'admin':
+        flash('No tienes permisos para acceder a esta página', 'danger')
+        return redirect(url_for('dashboard'))
+    
+    connection = get_db_connection()
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT COUNT(*) as total FROM brigadistas")
+            total_brigadistas = cursor.fetchone()['total']
+            cursor.execute("SELECT COUNT(*) as total FROM usuarios WHERE activo = TRUE")
+            total_usuarios = cursor.fetchone()['total']
+    finally:
+        connection.close()
+    
+    return render_template('configuracion.html', 
+                         total_brigadistas=total_brigadistas,
+                         total_usuarios=total_usuarios)
+
+# ============================================
+# VER FOTO
+# ============================================
+
+@app.route('/ver_foto/<filename>')
+def ver_foto(filename):
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+    return send_file(os.path.join(app.config['UPLOAD_FOLDER_FOTOS'], filename))
+
+# ============================================
+# API PARA GRÁFICOS
+# ============================================
+
+@app.route('/api/asistencia_semanal')
+def api_asistencia_semanal():
+    if 'user_id' not in session:
+        return jsonify({'error': 'No autorizado'}), 401
+    
+    connection = get_db_connection()
+    try:
+        with connection.cursor() as cursor:
+            dias = []
+            presentes = []
+            ausentes = []
+            for i in range(6, -1, -1):
+                fecha = datetime.now().date() - timedelta(days=i)
+                dias.append(fecha.strftime('%a'))
+                cursor.execute("SELECT COUNT(*) as total FROM asistencia WHERE fecha = %s AND estado = 'Presente'", (fecha,))
+                presentes.append(cursor.fetchone()['total'])
+                cursor.execute("SELECT COUNT(*) as total FROM asistencia WHERE fecha = %s AND estado = 'Ausente'", (fecha,))
+                ausentes.append(cursor.fetchone()['total'])
+            return jsonify({'labels': dias, 'presentes': presentes, 'ausentes': ausentes})
+    finally:
+        connection.close()
+
+@app.route('/api/patrullas_distribucion')
+def api_patrullas_distribucion():
+    if 'user_id' not in session:
+        return jsonify({'error': 'No autorizado'}), 401
+    
+    connection = get_db_connection()
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute("""
+                SELECT p.nombre, COUNT(b.id) as cantidad 
+                FROM patrullas p 
+                LEFT JOIN brigadistas b ON p.id = b.patrulla_id 
+                WHERE p.activo = TRUE 
+                GROUP BY p.id
+            """)
+            return jsonify(cursor.fetchall())
+    finally:
+        connection.close()
+
+@app.route('/api/condiciones_distribucion')
+def api_condiciones_distribucion():
+    if 'user_id' not in session:
+        return jsonify({'error': 'No autorizado'}), 401
+    
+    connection = get_db_connection()
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT condicion, COUNT(*) as cantidad FROM brigadistas GROUP BY condicion")
+            return jsonify(cursor.fetchall())
+    finally:
+        connection.close()
+
+@app.route('/api/evaluaciones_tipos')
+def api_evaluaciones_tipos():
+    if 'user_id' not in session:
+        return jsonify({'error': 'No autorizado'}), 401
+    
+    connection = get_db_connection()
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT tipo, COUNT(*) as cantidad FROM evaluaciones GROUP BY tipo")
+            return jsonify(cursor.fetchall())
+    finally:
+        connection.close()
+
+# ============================================
+# EXPORTAR DATOS (Para reportes)
+# ============================================
+
+@app.route('/exportar_brigadistas')
+def exportar_brigadistas():
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+    flash('Exportando brigadistas...', 'info')
+    return redirect(url_for('reportes'))
+
+@app.route('/exportar_asistencia')
+def exportar_asistencia():
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+    flash('Exportando asistencia...', 'info')
+    return redirect(url_for('reportes'))
+
+@app.route('/exportar_evaluaciones')
+def exportar_evaluaciones():
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+    flash('Exportando evaluaciones...', 'info')
+    return redirect(url_for('reportes'))
+
+@app.route('/exportar_actividades')
+def exportar_actividades():
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+    flash('Exportando actividades...', 'info')
+    return redirect(url_for('reportes'))
+
+@app.route('/exportar_backup')
+def exportar_backup():
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+    flash('Generando backup...', 'info')
+    return redirect(url_for('reportes'))
+
+# ============================================
+# ELIMINAR CUENTA
+# ============================================
+
+@app.route('/eliminar_cuenta', methods=['POST'])
+def eliminar_cuenta():
+    if 'user_id' not in session:
+        return jsonify({'success': False, 'error': 'No autorizado'})
+    
+    data = json.loads(request.data)
+    contraseña = data.get('contraseña')
+    
+    if not contraseña:
+        return jsonify({'success': False, 'error': 'Contraseña requerida'})
+    
+    connection = get_db_connection()
+    try:
+        with connection.cursor() as cursor:
+            contraseña_hash = hash_contraseña(contraseña)
+            cursor.execute("SELECT id, avatar FROM usuarios WHERE id = %s AND contraseña = %s", 
+                         (session['user_id'], contraseña_hash))
+            user = cursor.fetchone()
+            if user:
+                if user['avatar'] and user['avatar'] != 'default.png':
+                    avatar_path = os.path.join(app.config['UPLOAD_FOLDER_FOTOS'], user['avatar'])
+                    if os.path.exists(avatar_path):
+                        os.remove(avatar_path)
+                cursor.execute("DELETE FROM usuarios WHERE id = %s", (session['user_id'],))
+                connection.commit()
+                session.clear()
+                return jsonify({'success': True})
+            else:
+                return jsonify({'success': False, 'error': 'Contraseña incorrecta'})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)})
+    finally:
+        connection.close()
+
+# ============================================
+# EJECUCIÓN
+# ============================================
+
+if __name__ == '__main__':
+    app.run(debug=True, port=5000)

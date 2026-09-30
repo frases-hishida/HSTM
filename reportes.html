@@ -1,0 +1,138 @@
+{% extends "base.html" %}
+{% block title %}Reportes - Brigada Juvenil 2026{% endblock %}
+
+{% block extra_css %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto">
+    <h1 class="text-3xl font-bold text-primary mb-6"><i class="fas fa-file-alt text-red-500 mr-3"></i>Reportes</h1>
+
+    <!-- Resumen -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+        <div class="stat-card p-6 text-center">
+            <span class="text-2xl font-bold text-primary block">{{ total_brigadistas|default(0) }}</span>
+            <span class="text-secondary">Total Brigadistas</span>
+        </div>
+        <div class="stat-card p-6 text-center">
+            <span class="text-2xl font-bold text-green-600 block">{{ condiciones|selectattr('condicion', 'equalto', 'Activo')|map(attribute='cantidad')|sum|default(0) }}</span>
+            <span class="text-secondary">Activos</span>
+        </div>
+        <div class="stat-card p-6 text-center">
+            <span class="text-2xl font-bold text-yellow-600 block">{{ condiciones|selectattr('condicion', 'equalto', 'Inactivo')|map(attribute='cantidad')|sum|default(0) }}</span>
+            <span class="text-secondary">Inactivos</span>
+        </div>
+        <div class="stat-card p-6 text-center">
+            <span class="text-2xl font-bold text-blue-600 block">{{ evaluaciones_data|map(attribute='cantidad')|sum|default(0) }}</span>
+            <span class="text-secondary">Evaluaciones</span>
+        </div>
+    </div>
+
+    <!-- Gráficos -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+        <!-- Condición de brigadistas -->
+        <div class="card p-6">
+            <h3 class="text-lg font-bold text-primary mb-4">📊 Condición de Brigadistas</h3>
+            <canvas id="condicionChart" height="200"></canvas>
+        </div>
+        <!-- Distribución por patrulla -->
+        <div class="card p-6">
+            <h3 class="text-lg font-bold text-primary mb-4">📊 Distribución por Patrulla</h3>
+            <canvas id="patrullasChart" height="200"></canvas>
+        </div>
+        <!-- Tipos de evaluación -->
+        <div class="card p-6 lg:col-span-2">
+            <h3 class="text-lg font-bold text-primary mb-4">📊 Tipos de Evaluación</h3>
+            <canvas id="evaluacionesChart" height="150"></canvas>
+        </div>
+    </div>
+
+    <!-- Botones de exportación -->
+    <div class="flex gap-4 flex-wrap mb-8">
+        <a href="{{ url_for('exportar_excel') }}" class="btn-success px-6 py-2 rounded-lg"><i class="fas fa-file-excel mr-2"></i>Exportar a Excel</a>
+        <a href="{{ url_for('exportar_pdf') }}" class="btn-danger px-6 py-2 rounded-lg"><i class="fas fa-file-pdf mr-2"></i>Exportar a PDF</a>
+        <button onclick="window.print()" class="btn-primary px-6 py-2 rounded-lg"><i class="fas fa-print mr-2"></i>Imprimir</button>
+    </div>
+
+    <!-- Tabla de brigadistas (opcional) -->
+    <div class="card p-6">
+        <h3 class="text-lg font-bold text-primary mb-4">📋 Listado de Brigadistas</h3>
+        <div class="overflow-x-auto">
+            <table class="w-full">
+                <thead>
+                    <tr class="border-b-2 border-red-200 text-left">
+                        <th class="py-2 px-4 text-primary">Nombre</th>
+                        <th class="py-2 px-4 text-primary">Cédula</th>
+                        <th class="py-2 px-4 text-primary">Patrulla</th>
+                        <th class="py-2 px-4 text-primary">Condición</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for b in brigadistas_lista %}
+                    <tr class="border-b border-gray-100">
+                        <td class="py-2 px-4">{{ b.nombre }} {{ b.apellido }}</td>
+                        <td class="py-2 px-4">{{ b.cedula }}</td>
+                        <td class="py-2 px-4">{{ b.patrulla_nombre or 'Sin asignar' }}</td>
+                        <td class="py-2 px-4">
+                            <span class="px-2 py-1 rounded-full text-xs {% if b.condicion == 'Activo' %}bg-green-100 text-green-700 border border-green-300{% else %}bg-yellow-100 text-yellow-700 border border-yellow-300{% endif %}">
+                                {{ b.condicion }}
+                            </span>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    // Gráfico de Condición
+    const condiciones = {{ condiciones|tojson }};
+    const labelsCond = condiciones.map(c => c.condicion);
+    const dataCond = condiciones.map(c => c.cantidad);
+    new Chart(document.getElementById('condicionChart'), {
+        type: 'pie',
+        data: {
+            labels: labelsCond,
+            datasets: [{
+                data: dataCond,
+                backgroundColor: ['#dc2626', '#f59e0b', '#3b82f6', '#10b981']
+            }]
+        },
+        options: { responsive: true, plugins: { legend: { position: 'bottom' } } }
+    });
+
+    // Gráfico de Patrullas
+    const patrullas = {{ patrullas_data|tojson }};
+    new Chart(document.getElementById('patrullasChart'), {
+        type: 'bar',
+        data: {
+            labels: patrullas.map(p => p.nombre),
+            datasets: [{
+                label: 'Brigadistas',
+                data: patrullas.map(p => p.cantidad),
+                backgroundColor: '#dc2626'
+            }]
+        },
+        options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, stepSize: 1 } } }
+    });
+
+    // Gráfico de Evaluaciones
+    const evaluaciones = {{ evaluaciones_data|tojson }};
+    new Chart(document.getElementById('evaluacionesChart'), {
+        type: 'bar',
+        data: {
+            labels: evaluaciones.map(e => e.tipo),
+            datasets: [{
+                label: 'Cantidad',
+                data: evaluaciones.map(e => e.cantidad),
+                backgroundColor: ['#dc2626', '#f59e0b', '#3b82f6', '#10b981', '#8b5cf6']
+            }]
+        },
+        options: { responsive: true, plugins: { legend: { display: false } } }
+    });
+</script>
+{% endblock %}
